@@ -1,13 +1,18 @@
-// plugins/ACD_TIKTOK.js — TikTok Downloader (unified box style, no final message)
+// plugins/ACD_TIKTOK.js — TikTok Downloader (WhiteShadow API + WhatsApp buttons)
 const { cmd } = require('../command');
 const { getBuffer } = require('../lib/functions');
 const axios = require('axios');
 const config = require('../config');
 
 const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
-const FOOTER  = config.footer  || '> ᴛɪᴋᴛᴏᴋ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
+const FOOTER   = config.footer  || '> ᴛɪᴋᴛᴏᴋ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
 
-const TIKTOK_IMG = 'https://files.catbox.moe/chtymz.jpg';
+const TIKTOK_IMG   = 'https://files.catbox.moe/chtymz.jpg';
+const API_BASE     = 'https://whiteshadow-x-api.onrender.com/api/download/tiktok';
+const API_TOKEN    = 'aWK0z4';
+
+// ── Session store: sender -> { video, audio, title, thumb } ───────
+const tiktokSession = new Map();
 
 // ── Helper: send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {
@@ -15,7 +20,7 @@ async function sendWithImage(conn, from, mek, imageUrl, caption) {
         const imgBuf = await getBuffer(imageUrl);
         await conn.sendMessage(from, {
             image: imgBuf,
-            caption: caption,
+            caption,
             mimetype: 'image/jpeg'
         }, { quoted: mek });
     } catch (e) {
@@ -23,25 +28,54 @@ async function sendWithImage(conn, from, mek, imageUrl, caption) {
     }
 }
 
+// ── Helper: send WhatsApp native quick-reply buttons (with fallback) ──
+async function sendButtons(conn, from, mek, { imageUrl, caption, buttons }) {
+    // buttons: [{ id, text }]
+    const nativeButtons = buttons.map(b => ({
+        name: 'quick_reply',
+        buttonParamsJson: JSON.stringify({ display_text: b.text, id: b.id })
+    }));
+
+    try {
+        const imgBuf = await getBuffer(imageUrl);
+        await conn.sendMessage(from, {
+            image: imgBuf,
+            mimetype: 'image/jpeg',
+            caption,
+            footer: FOOTER,
+            interactiveButtons: nativeButtons
+        }, { quoted: mek });
+        return;
+    } catch (e1) {
+        try {
+            await conn.sendMessage(from, {
+                text: caption,
+                footer: FOOTER,
+                interactiveButtons: nativeButtons
+            }, { quoted: mek });
+            return;
+        } catch (e2) {
+            // Last resort: plain numbered text (client has zero button support)
+            const numbered = buttons.map((b, i) => `*${i + 1}.* ${b.text}`).join('\n');
+            await conn.sendMessage(from, {
+                text: `${caption}\n\n${numbered}\n\n_Reply with a number._`
+            }, { quoted: mek });
+        }
+    }
+}
+
 // ── Build current date/time line ─────────────────────────────────
 function getDateTimeLine() {
     const now = new Date();
     const date = now.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        timeZone: 'Asia/Colombo'
+        day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Colombo'
     });
     const time = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: 'Asia/Colombo'
+        hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Colombo'
     });
     return `┃ \`Time :\` ${time}\n┃ \`Date :\` ${date}`;
 }
 
-// ── Header box ──────────────────────────────────────────────────
 function headerBox(platform) {
     const top    = '*┏━━━━━━━━━━━━━━✦*';
     const bot    = `*┃ \`Bot Name :\` ${BOT_NAME}*`;
@@ -51,7 +85,6 @@ function headerBox(platform) {
     return `${top}\n${bot}\n${time}\n${plat}\n${bottom}`;
 }
 
-// ── Content box ─────────────────────────────────────────────────
 function contentBox(lines) {
     const top = '┏━━━━━━━━━━━━━━✦';
     const bottom = '┗━━━━━━━━━━━━━━✦';
@@ -59,11 +92,38 @@ function contentBox(lines) {
     return `${top}\n${content}\n${bottom}`;
 }
 
-// ── Session store ─────────────────────────────────────────────────
-const tiktokSession = new Map();
+// ── Parse the WhiteShadow API response into a normalized shape ────
+// The API's error shape is confirmed as: { success, result: { code: -1, msg } }
+// The success shape isn't documented, so this checks several common
+// field names defensively. Adjust the field names below once you see
+// a real successful response logged to console.
+function parseTiktokResult(json) {
+    const r = json?.result || json?.data || json;
+    if (!r || r.code === -1 || r.status === false || r.success === false) {
+        return { ok: false, msg: r?.msg || json?.msg || 'Unknown error from API' };
+    }
+
+    const data = r.data || r;
+
+    const video =
+        data.video || data.play || data.nowm || data.no_watermark ||
+        data.video_url || data.hdplay || data.download_url || null;
+
+    const audio =
+        data.audio || data.music || data.audio_url || data.mp3 || null;
+
+    const title = data.title || data.desc || data.caption || 'TikTok Video';
+    const thumb = data.thumbnail || data.cover || data.thumb || TIKTOK_IMG;
+    const author = data.author?.nickname || data.author?.unique_id || data.username || null;
+
+    if (!video && !audio) {
+        return { ok: false, msg: 'API returned success but no media link was found in the response.' };
+    }
+    return { ok: true, video, audio, title, thumb, author };
+}
 
 // ══════════════════════════════════════════════════════════════════
-// TIKTOK COMMAND — starts the version picker
+// TIKTOK COMMAND
 // ══════════════════════════════════════════════════════════════════
 cmd({
     pattern: 'tiktok',
@@ -78,223 +138,152 @@ cmd({
 
         if (!q) {
             const usageCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
-                                 contentBox([
-                                     '❏ .tiktok <TikTok URL>',
-                                     '',
-                                     'Example:',
-                                     '  .tiktok https://vt.tiktok.com/abc'
-                                 ]) + '\n\n' + FOOTER;
+                contentBox([
+                    '❏ .tiktok <TikTok URL>',
+                    '',
+                    'Example:',
+                    '  .tiktok https://vt.tiktok.com/abc'
+                ]) + '\n\n' + FOOTER;
             return await sendWithImage(conn, from, mek, TIKTOK_IMG, usageCaption);
         }
 
         const url = q.split(' ')[0].trim();
         if (!url.startsWith('http')) {
             const invalidCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
-                                   contentBox(['⚠️ Please provide a valid TikTok URL.']) + '\n\n' + FOOTER;
+                contentBox(['⚠️ Please provide a valid TikTok URL.']) + '\n\n' + FOOTER;
             return await sendWithImage(conn, from, mek, TIKTOK_IMG, invalidCaption);
         }
 
-        tiktokSession.set(sender, { url });
+        // Let the user know we're fetching (API can be slow on Render free tier — cold start)
+        const waitCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
+            contentBox(['⏳ Fetching your video, please wait...']) + '\n\n' + FOOTER;
+        await sendWithImage(conn, from, mek, TIKTOK_IMG, waitCaption);
+
+        let json;
+        try {
+            const { data } = await axios.get(API_BASE, {
+                params: { url, apitoken: API_TOKEN },
+                timeout: 30000
+            });
+            json = data;
+        } catch (apiErr) {
+            console.error('[TIKTOK API ERROR]', apiErr?.response?.data || apiErr.message);
+            const failCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
+                contentBox([
+                    '❌ Failed to reach the download API.',
+                    'It may be down or restarting (cold start).',
+                    'Please try again in a moment.'
+                ]) + '\n\n' + FOOTER;
+            return await sendWithImage(conn, from, mek, TIKTOK_IMG, failCaption);
+        }
+
+        const parsed = parseTiktokResult(json);
+        if (!parsed.ok) {
+            console.error('[TIKTOK PARSE FAIL]', JSON.stringify(json));
+            const failCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
+                contentBox([
+                    `❌ ${parsed.msg}`,
+                    '',
+                    'Double check the link is a valid, public TikTok video URL.'
+                ]) + '\n\n' + FOOTER;
+            return await sendWithImage(conn, from, mek, TIKTOK_IMG, failCaption);
+        }
+
+        tiktokSession.set(sender, {
+            video: parsed.video,
+            audio: parsed.audio,
+            title: parsed.title,
+            thumb: parsed.thumb
+        });
         setTimeout(() => tiktokSession.delete(sender), 120000);
 
-        const versionCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
-                               contentBox([
-                                   '🔗 Link ready. Select API version:',
-                                   '',
-                                   '*1* ✨ V1 (Support Slide)',
-                                   '*2* ✨ V2 (Support Slide)',
-                                   '*3* ✨ V3 (No Slide)',
-                                   '*4* ✨ V4 (Audio + Video)',
-                                   '',
-                                   'Reply with 1, 2, 3, or 4.'
-                               ]) + '\n\n' + FOOTER;
-        await sendWithImage(conn, from, mek, TIKTOK_IMG, versionCaption);
+        const readyLines = [
+            `🎬 *${parsed.title}*`,
+            parsed.author ? `👤 By: ${parsed.author}` : null,
+            '',
+            'Select what you want to download:'
+        ].filter(Boolean);
+
+        const readyCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
+            contentBox(readyLines) + '\n\n' + FOOTER;
+
+        const buttons = [];
+        if (parsed.video) buttons.push({ id: `tiktok_dl::video::${sender}`, text: '🎥 Download Video' });
+        if (parsed.audio) buttons.push({ id: `tiktok_dl::audio::${sender}`, text: '🎵 Download Audio' });
+
+        await sendButtons(conn, from, mek, {
+            imageUrl: parsed.thumb || TIKTOK_IMG,
+            caption: readyCaption,
+            buttons
+        });
 
     } catch (e) {
         console.error('[TIKTOK CMD ERROR]', e);
-        const errCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
-                           contentBox(['❌ An unexpected error occurred.']) + '\n\n' + FOOTER;
-        await sendWithImage(conn, from, mek, TIKTOK_IMG, errCaption);
+        reply(`❌ Error: ${e.message}`);
     }
 });
 
 // ══════════════════════════════════════════════════════════════════
-// NUMBER REPLY LISTENER — version selection & download
+// BUTTON TAP LISTENER — sends the actual video/audio file
 // ══════════════════════════════════════════════════════════════════
 cmd({
     on: 'body',
     dontAddCommandList: true,
     filename: __filename
-}, async (conn, mek, m, { sender, body, from }) => {
+}, async (conn, mek, m, { sender, from, body }) => {
     try {
-        const session = tiktokSession.get(sender);
-        if (!session) return;
+        let selectedId = null;
+        const nativeFlow = m.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson;
+        const btnId = m.message?.buttonsResponseMessage?.selectedButtonId;
 
-        const input = body.trim();
-        const versionNum = parseInt(input);
-        if (isNaN(versionNum) || versionNum < 1 || versionNum > 4) return;
-
-        const { url } = session;
-        const version = ['v1', 'v2', 'v3', 'v4'][versionNum - 1];
-        tiktokSession.delete(sender);
-
-        // ── Animated processing text ───────────────────────────
-        const procStages = ['P R O C E S S I N G *', 'P R O C E S S I N G **', 'P R O C E S S I N G ***'];
-        const procMsg = await conn.sendMessage(from, { text: procStages[0] }, { quoted: mek });
-
-        let procIdx = 0;
-        const procInterval = setInterval(async () => {
-            procIdx = (procIdx + 1) % procStages.length;
-            try {
-                await conn.sendMessage(from, {
-                    text: procStages[procIdx],
-                    edit: procMsg.key
-                });
-            } catch (e) {}
-        }, 400);
-
-        let downloadSuccess = false;
-
-        try {
-            // ── V4 (Audio + Video) ──────────────────────────────
-            if (version === 'v4') {
-                const { data } = await axios.get('https://tikdown.ikyzxz.my.id/api/v1', { params: { url } });
-                if (!data.status) throw new Error('Download V4 failed');
-                const res = data;
-
-                if (res.download?.nowm) {
-                    await conn.sendMessage(from, {
-                        video: { url: res.download.nowm },
-                        mimetype: 'video/mp4'
-                    }, { quoted: mek });
-                    downloadSuccess = true;
-                } else if (res.download?.wm) {
-                    await conn.sendMessage(from, {
-                        video: { url: res.download.wm },
-                        mimetype: 'video/mp4'
-                    }, { quoted: mek });
-                    downloadSuccess = true;
-                }
-
-                if (res.download?.mp3) {
-                    await conn.sendMessage(from, {
-                        audio: { url: res.download.mp3 },
-                        mimetype: 'audio/mpeg',
-                        fileName: 'tiktok.mp3',
-                        ptt: false
-                    }, { quoted: mek });
-                    downloadSuccess = true;
-                }
-            }
-
-            // ── V1 (Supports slides) ────────────────────────────
-            else if (version === 'v1') {
-                const { data } = await axios.get('https://api.ikyyxd.my.id/download/tiktok', {
-                    params: { apikey: 'kyzz', query: url }
-                });
-                if (!data.status) throw new Error('Download V1 failed');
-                const res = data.result;
-
-                if (res.video) {
-                    await conn.sendMessage(from, {
-                        video: { url: res.video },
-                        mimetype: 'video/mp4'
-                    }, { quoted: mek });
-                    downloadSuccess = true;
-                }
-
-                if (res.slides?.length) {
-                    for (const slide of res.slides) {
-                        await conn.sendMessage(from, {
-                            image: { url: slide.img_result },
-                            mimetype: 'image/jpeg'
-                        }, { quoted: mek });
-                    }
-                    downloadSuccess = true;
-                }
-
-                if (res.audio) {
-                    await conn.sendMessage(from, {
-                        audio: { url: res.audio },
-                        mimetype: 'audio/mpeg',
-                        fileName: 'tiktok_audio.mp3',
-                        ptt: false
-                    }, { quoted: mek });
-                    downloadSuccess = true;
-                }
-            }
-
-            // ── V2 (Supports slides) ────────────────────────────
-            else if (version === 'v2') {
-                const { data } = await axios.get('https://api.ikyyxd.my.id/download/tiktokv2', { params: { url } });
-                if (!data.status) throw new Error('Download V2 failed');
-                const res = data.result;
-
-                if (res.video?.length) {
-                    for (const v of res.video) {
-                        await conn.sendMessage(from, {
-                            video: { url: v },
-                            mimetype: 'video/mp4'
-                        }, { quoted: mek });
-                    }
-                    downloadSuccess = true;
-                }
-
-                if (res.audio?.length) {
-                    for (const a of res.audio) {
-                        await conn.sendMessage(from, {
-                            audio: { url: a },
-                            mimetype: 'audio/mpeg',
-                            fileName: 'tiktok_audio.mp3',
-                            ptt: false
-                        }, { quoted: mek });
-                    }
-                    downloadSuccess = true;
-                }
-            }
-
-            // ── V3 (No slide, tikwm.com) ────────────────────────
-            else if (version === 'v3') {
-                const { data } = await axios.get('https://www.tikwm.com/api/', { params: { url } });
-                if (data.code !== 0) throw new Error('Download V3 failed');
-                const res = data.data;
-
-                await conn.sendMessage(from, {
-                    video: { url: res.play },
-                    mimetype: 'video/mp4'
-                }, { quoted: mek });
-                downloadSuccess = true;
-
-                if (res.music) {
-                    await conn.sendMessage(from, {
-                        audio: { url: res.music },
-                        mimetype: 'audio/mpeg',
-                        fileName: 'tiktok.mp3',
-                        ptt: false
-                    }, { quoted: mek });
-                }
-            }
-
-        } catch (e) {
-            clearInterval(procInterval);
-            await conn.sendMessage(from, { delete: procMsg.key });
-            const errCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
-                               contentBox(['❌ Download failed. Try another version.']) + '\n\n' + FOOTER;
-            return await sendWithImage(conn, from, mek, TIKTOK_IMG, errCaption);
+        if (nativeFlow) {
+            try { selectedId = JSON.parse(nativeFlow).id; } catch { }
+        } else if (btnId) {
+            selectedId = btnId;
         }
 
-        // Stop animation & delete it
-        clearInterval(procInterval);
-        await conn.sendMessage(from, { delete: procMsg.key });
+        // Fallback: plain "1"/"2" reply when no button support at all
+        if (!selectedId && tiktokSession.has(sender)) {
+            const input = (body || '').trim();
+            const session = tiktokSession.get(sender);
+            if (input === '1' && session.video) selectedId = `tiktok_dl::video::${sender}`;
+            else if (input === '2' && session.audio) selectedId = `tiktok_dl::audio::${sender}`;
+        }
 
-        // No final success message – media already sent silently
+        if (!selectedId || !selectedId.startsWith('tiktok_dl::')) return;
+
+        const [, type, ownerId] = selectedId.split('::');
+        if (ownerId !== sender) return; // only the requester can trigger their own session
+
+        const session = tiktokSession.get(sender);
+        if (!session) {
+            return await conn.sendMessage(from, {
+                text: '⚠️ This session expired. Please run `.tiktok <url>` again.'
+            }, { quoted: mek });
+        }
+
+        const mediaUrl = type === 'video' ? session.video : session.audio;
+        if (!mediaUrl) return;
+
+        await conn.sendMessage(from, { react: { text: '⬇️', key: mek.key } });
+
+        const buf = await getBuffer(mediaUrl);
+
+        if (type === 'video') {
+            await conn.sendMessage(from, {
+                video: buf,
+                mimetype: 'video/mp4',
+                caption: `🎬 *${session.title}*\n${FOOTER}`
+            }, { quoted: mek });
+        } else {
+            await conn.sendMessage(from, {
+                audio: buf,
+                mimetype: 'audio/mpeg',
+                ptt: false
+            }, { quoted: mek });
+        }
 
     } catch (e) {
-        console.error('[TIKTOK LISTENER ERROR]', e);
-        // If error occurs outside the download try-catch
-        const errCaption = headerBox('TIKTOK DOWNLOADER') + '\n\n' +
-                           contentBox(['⚠️ An error occurred.']) + '\n\n' + FOOTER;
-        await sendWithImage(conn, from, mek, TIKTOK_IMG, errCaption);
-        tiktokSession.delete(sender);
+        console.error('[TIKTOK DOWNLOAD ERROR]', e);
     }
 });
