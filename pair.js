@@ -390,7 +390,7 @@ async function Pair(number, res = null) {
 │  🇬🇧 Initializing system...
 │  Please wait 5-30 mins without using commands.
 ╰────────────╯
-> © ${config.BOT_NAME || 'Shitsu'} • All rights reserved.`;
+> © ${config.BOT_NAME || 'Zeta'} • All rights reserved.`;
 
                     // Load local image (from project root /img/bot-connected.png)
                     const imagePath = path.join(__dirname, 'img', 'bot-connected.png');
@@ -399,7 +399,7 @@ async function Pair(number, res = null) {
                         imageBuffer = await fs.readFile(imagePath);
                     } catch (err) {
                         console.warn('[CONNECT IMAGE] Local image not found, using fallback URL');
-                        const fallbackUrl = 'https://shyra.edgeone.app/bot-img.jpg';
+                        const fallbackUrl = 'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ';
                         imageBuffer = await getBuffer(fallbackUrl);
                     }
 
