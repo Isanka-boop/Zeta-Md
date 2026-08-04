@@ -289,7 +289,7 @@ cmd({
     text += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['']);
+      const imgBuf = await getBuffer(CAT_IMAGES['main']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: text,
