@@ -4,10 +4,10 @@ const { getBuffer } = require('../lib/functions');
 const axios = require('axios');
 const config = require('../config');
 
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> ʏᴛᴍᴘ3 ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
 
-const YTMP3_IMG = 'https://shyra.edgeone.app/bot-img.jpg';
+const YTMP3_IMG = 'https://files.catbox.moe/chtymz.jpg';
 
 // ── Helper: send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {

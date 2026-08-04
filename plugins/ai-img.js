@@ -5,12 +5,12 @@ const axios = require('axios');
 
 // ── CONFIG ─────────────────────────────────────────
 const AI_IMAGES = {
-  loading: 'https://shyra.edgeone.app/bot-img.jpg',
-  success: 'https://shyra.edgeone.app/bot-img.jpg',
-  error:   'https://shyra.edgeone.app/bot-img.jpg',
+  loading: 'https://files.catbox.moe/chtymz.jpg',
+  success: 'https://files.catbox.moe/chtymz.jpg',
+  error:   'https://files.catbox.moe/chtymz.jpg',
 };
 
-const BOT_NAME = 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const BOT_VER  = 'v3.1';
 
 // ── HELPERS ────────────────────────────────────────

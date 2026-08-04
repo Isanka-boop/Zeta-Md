@@ -8,10 +8,10 @@ const crypto = require('crypto');
 // CONFIG (same unified style)
 // ══════════════════════════════════════════════════════════════════
 const config = require('../config');
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> ᴛʀᴀɴꜱᴄʀɪᴘᴛ';
 
-const TRANS_IMG = 'https://shyra.edgeone.app/bot-img.jpg';
+const TRANS_IMG = 'https://files.catbox.moe/chtymz.jpg';
 
 // ── Helper: send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {

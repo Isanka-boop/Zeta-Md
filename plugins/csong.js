@@ -9,10 +9,10 @@ const path = require('path');
 const os = require('os');
 const config = require('../config');
 
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> ᴄʜᴀɴɴᴇʟ sᴏɴɢ';
 
-const CSONG_IMG = 'https://shyra.edgeone.app/bot-img.jpg';
+const CSONG_IMG = 'https://files.catbox.moe/chtymz.jpg';
 
 // ── Helper: send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {

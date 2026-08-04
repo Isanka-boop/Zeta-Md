@@ -4,9 +4,9 @@ const { getBuffer } = require('../lib/functions');
 
 // ── Image Configurations (உங்களுக்கு தேவையான இමේஜ் லிங்குகளை இங்கே மாற்றி அமைத்துக் கொள்ளுங்கள்) ──
 const VV_IMAGES = {
-  success: 'https://shyra.edgeone.app/bot-img.jpg', // மீடியா வெற்றிகரமாக அனுப்பப்படும் போது வரும் இமேஜ்
-  error:   'https://shyra.edgeone.app/bot-img.jpg', // எரர் அல்லது வியூ-ஒன்ஸ் இல்லை என்றால் வரும் இமேஜ்
-  other:   'https://shyra.edgeone.app/bot-img.jpg'  // Default fallback
+  success: 'https://files.catbox.moe/chtymz.jpg', // மீடியா வெற்றிகரமாக அனுப்பப்படும் போது வரும் இமேஜ்
+  error:   'https://files.catbox.moe/chtymz.jpg', // எரர் அல்லது வியூ-ஒன்ஸ் இல்லை என்றால் வரும் இமேஜ்
+  other:   'https://files.catbox.moe/chtymz.jpg'  // Default fallback
 };
 
 // ── Global Footer Content ────────────────────────────────────────

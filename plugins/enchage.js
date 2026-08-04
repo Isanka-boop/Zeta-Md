@@ -8,10 +8,10 @@ const mime = require('mime-types');
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 const config = require('../config');
 
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> ɪᴍᴀɢᴇ ᴛᴏᴏʟs';
 
-const TOOLS_IMG = 'https://shyra.edgeone.app/bot-img.jpg';
+const TOOLS_IMG = 'https://files.catbox.moe/chtymz.jpg';
 
 // ── Helper: send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {

@@ -7,10 +7,10 @@ const { getBuffer } = require('../lib/functions');
 // CONFIG (same as your SONG plugin)
 // ══════════════════════════════════════════════════════════════════
 const config = require('../config');
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> ꜰɪʟᴇ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
 
-const MF_IMG_URL = 'https://shyra.edgeone.app/bot-img.jpg'; // same image
+const MF_IMG_URL = 'https://files.catbox.moe/chtymz.jpg'; // same image
 
 // ── Helper: Send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {

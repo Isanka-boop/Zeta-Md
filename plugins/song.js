@@ -11,15 +11,15 @@ const os = require('os');
 // CONFIG (adjust according to your bot setup)
 // ══════════════════════════════════════════════════════════════════
 const config = require('../config');
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> ꜱᴏɴɢ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
 
 const SONG_IMAGES = {
-  search:   'https://shyra.edgeone.app/bot-img.jpg',
-  loading:  'https://shyra.edgeone.app/bot-img.jpg',
-  success:  'https://shyra.edgeone.app/bot-img.jpg',
-  error:    'https://shyra.edgeone.app/bot-img.jpg',
-  other:    'https://shyra.edgeone.app/bot-img.jpg'
+  search:   'https://files.catbox.moe/chtymz.jpg',
+  loading:  'https://files.catbox.moe/chtymz.jpg',
+  success:  'https://files.catbox.moe/chtymz.jpg',
+  error:    'https://files.catbox.moe/chtymz.jpg',
+  other:    'https://files.catbox.moe/chtymz.jpg'
 };
 
 // ── Pending state: userId -> { stage, results, chosen, query }

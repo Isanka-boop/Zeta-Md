@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 // ── Image & Footer Configurations ────────────────────────────────
-const AUTOREPLY_IMG_URL = 'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ'; // ஆட்டோ-ரிப்ளை மீடியாவுடன் செல்லும் இமேஜ் லிங்க்
+const AUTOREPLY_IMG_URL = 'https://files.catbox.moe/chtymz.jpg'; // ஆட்டோ-ரிப்ளை மீடியாவுடன் செல்லும் இமேஜ் லிங்க்
 const GLOBAL_FOOTER     = `\n╭─────𓆩★𓆪──────╮\n> ㋛ Ⲣ૦𝚅𝞔Ꮢ𝞔Ｄ 𝗕Ⲩ 𝐈𝐬𝐚𝐧𝐤𝐚∇\n╰─────𓆩★𓆪──────╯`;
 
 const autoreplyPath = path.join(__dirname, '../all/autoreply.json');
