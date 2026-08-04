@@ -3,6 +3,11 @@ const { cmd } = require('../command');
 const { getBuffer } = require('../lib/functions');
 const axios = require('axios');
 const config = require('../config');
+const {
+    proto,
+    generateWAMessageFromContent,
+    prepareWAMessageMedia
+} = require('@whiskeysockets/baileys');
 
 const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER   = config.footer  || '> ᴛɪᴋᴛᴏᴋ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
@@ -29,6 +34,14 @@ async function sendWithImage(conn, from, mek, imageUrl, caption) {
 }
 
 // ── Helper: send WhatsApp native quick-reply buttons (with fallback) ──
+//
+// NOTE: passing `interactiveButtons` straight into conn.sendMessage(...)
+// is NOT a content type Baileys' high-level sendMessage() understands —
+// it gets silently dropped (no throw), so the person only ever received
+// the image/caption with no button at all, which is why "the button
+// doesn't work." Real, working native-flow (quick_reply) buttons on
+// current WhatsApp need to be built as a raw proto InteractiveMessage
+// and sent with conn.relayMessage(). That's what this does now.
 async function sendButtons(conn, from, mek, { imageUrl, caption, buttons }) {
     // buttons: [{ id, text }]
     const nativeButtons = buttons.map(b => ({
@@ -37,29 +50,58 @@ async function sendButtons(conn, from, mek, { imageUrl, caption, buttons }) {
     }));
 
     try {
-        const imgBuf = await getBuffer(imageUrl);
-        await conn.sendMessage(from, {
-            image: imgBuf,
-            mimetype: 'image/jpeg',
-            caption,
-            footer: FOOTER,
-            interactiveButtons: nativeButtons
-        }, { quoted: mek });
+        let header;
+        try {
+            const imgBuf = await getBuffer(imageUrl);
+            const media = await prepareWAMessageMedia(
+                { image: imgBuf },
+                { upload: conn.waUploadToServer }
+            );
+            header = proto.Message.InteractiveMessage.Header.fromObject({
+                hasMediaAttachment: true,
+                ...media
+            });
+        } catch (imgErr) {
+            console.error('[TIKTOK BUTTON IMG ERROR]', imgErr.message);
+            header = proto.Message.InteractiveMessage.Header.fromObject({
+                title: '', hasMediaAttachment: false
+            });
+        }
+
+        const interactiveMessage = proto.Message.InteractiveMessage.fromObject({
+            body: proto.Message.InteractiveMessage.Body.fromObject({ text: caption }),
+            footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: FOOTER }),
+            header,
+            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons: nativeButtons
+            })
+        });
+
+        const waMsg = generateWAMessageFromContent(from, {
+            viewOnceMessage: {
+                message: {
+                    messageContextInfo: {
+                        deviceListMetadataVersion: 2,
+                        deviceListMetadata: {}
+                    },
+                    interactiveMessage
+                }
+            }
+        }, { quoted: mek, userJid: conn.user.id });
+
+        await conn.relayMessage(from, waMsg.message, { messageId: waMsg.key.id });
         return;
     } catch (e1) {
+        console.error('[TIKTOK BUTTON SEND ERROR]', e1);
+        // Last resort: plain numbered text (client has zero button support,
+        // or something above genuinely failed) — still usable via "1"/"2" reply.
         try {
-            await conn.sendMessage(from, {
-                text: caption,
-                footer: FOOTER,
-                interactiveButtons: nativeButtons
-            }, { quoted: mek });
-            return;
-        } catch (e2) {
-            // Last resort: plain numbered text (client has zero button support)
             const numbered = buttons.map((b, i) => `*${i + 1}.* ${b.text}`).join('\n');
             await conn.sendMessage(from, {
                 text: `${caption}\n\n${numbered}\n\n_Reply with a number._`
             }, { quoted: mek });
+        } catch (e2) {
+            console.error('[TIKTOK BUTTON FALLBACK SEND ERROR]', e2);
         }
     }
 }
@@ -251,6 +293,7 @@ cmd({
         }
 
         if (!selectedId || !selectedId.startsWith('tiktok_dl::')) return;
+        console.log('[TIKTOK BUTTON TAP]', { selectedId, sender });
 
         const [, type, ownerId] = selectedId.split('::');
         if (ownerId !== sender) return; // only the requester can trigger their own session
