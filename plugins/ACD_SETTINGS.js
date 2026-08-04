@@ -4,10 +4,10 @@ const { initEnvsettings, getSetting, setSetting, toggleSetting, getFullSettings,
 const { getBuffer } = require('../lib/functions');
 const config = require('../config');
 
-const BOT_NAME = config.BOT_NAME || 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
 const FOOTER  = config.footer  || '> sᴇᴛᴛɪɴɢs';
 
-const SETTINGS_IMG = 'https://shyra.edgeone.app/bot-img.jpg';
+const SETTINGS_IMG = 'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ';
 
 // ── Helper: send image + caption, fallback to text ────────────────
 async function sendWithImage(conn, from, mek, imageUrl, caption) {
