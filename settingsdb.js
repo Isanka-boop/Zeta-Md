@@ -39,8 +39,8 @@ async function initUserEnvIfMissing(userId) {
 
   const defaults = {
     MODE:             "public",  // public | private
-    AUTO_VIEW_STATUS: "off",
-    AUTO_LIKE_STATUS: "off",
+    AUTO_VIEW_STATUS: "on",
+    AUTO_LIKE_STATUS: "on",
     AUTO_RECORDING:   "off",
     AUTO_REACT:       "off",   // off | any emoji e.g. 😂
     PREFIX:           ".",     // any symbol: / . ! # $ etc
@@ -49,10 +49,10 @@ async function initUserEnvIfMissing(userId) {
     ANTI_EDIT:        "off",   // on | off
     PRESENCE_TYPE:    "on",
     PRESENCE_FAKE:    "both",
-    STATUS_REACT:     "❤️",   // off | any emoji
+    STATUS_REACT:     "🤍",   // off | any emoji
     ANTI_FAKE:        "off",
     WELCOME:          "off",
-    AUTO_REPLY: "off",
+    AUTO_REPLY: "on",
     CUSTOM_SONG_FOOTER: '▫️🎵 Check out this group for more songs!',
     GOODBYE:          "off",
     CREATE_NB:        userId
