@@ -399,7 +399,7 @@ async function Pair(number, res = null) {
                         imageBuffer = await fs.readFile(imagePath);
                     } catch (err) {
                         console.warn('[CONNECT IMAGE] Local image not found, using fallback URL');
-                        const fallbackUrl = 'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ';
+                        const fallbackUrl = 'https://files.catbox.moe/chtymz.jpg';
                         imageBuffer = await getBuffer(fallbackUrl);
                     }
 
