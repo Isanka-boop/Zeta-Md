@@ -7,27 +7,27 @@ const os = require('os');  // For RAM info
 // ══════════════════════════════════════════════════════════════════
 // CONFIG — Change these to your own
 // ══════════════════════════════════════════════════════════════════
-const BOT_NAME    = 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME    = 'ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲';
 const BOT_VERSION = 'v3.0';
-const OWNER_NAME  = 'ᴅɪʟsʜᴀ∇';
+const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ∇';
 
 // ── All Menu Specific Images (All commands have image + reply) ─────
 const CAT_IMAGES = {
-  main:       'https://shyra.edgeone.app/bot-img.jpg', // Main Menu Image
-  alive:      'https://shyra.edgeone.app/bot-img.jpg', // Alive Image
-  detail:     'https://shyra.edgeone.app/bot-img.jpg', // Command Details Image
-  group:      'https://shyra.edgeone.app/bot-img.jpg',
-  main_cat:   'https://shyra.edgeone.app/bot-img.jpg', 
-  settings:   'https://shyra.edgeone.app/bot-img.jpg',
-  tools:      'https://shyra.edgeone.app/bot-img.jpg',
-  download:   'https://shyra.edgeone.app/bot-img.jpg',
-  ai:         'https://shyra.edgeone.app/bot-img.jpg',
-  fun:        'https://shyra.edgeone.app/bot-img.jpg',
-  search:     'https://shyra.edgeone.app/bot-img.jpg',
-  anime:      'https://shyra.edgeone.app/bot-img.jpg',
-  owner:      'https://shyra.edgeone.app/bot-img.jpg',
-  textmaker:  'https://shyra.edgeone.app/bot-img.jpg',
-  other:      'https://shyra.edgeone.app/bot-img.jpg'  // Default fallback
+  main:       'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Main Menu Image
+  alive:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Alive Image
+  detail:     'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Command Details Image
+  group:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  main_cat:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', 
+  settings:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  tools:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  download:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  ai:         'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  fun:        'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  search:     'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  anime:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  owner:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  textmaker:  'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
+  other:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ'  // Default fallback
 };
 
 // ── Category Specific React Emojis ───────────────────────────────
@@ -47,7 +47,7 @@ const CAT_REACTS = {
 };
 
 // ── Global Footer Content ────────────────────────────────────────
-const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ 𝙿σ𝚆є𝚁є𝙳 𝙱у ᴅɪʟsʜα∇\n╰─────𓆩★𓆪──────╯`;
+const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ 𝙿σ𝚆є𝚁є𝙳 𝙱у ɪꜱᴀɴᴋᴀ∇\n╰─────𓆩★𓆪──────╯`;
 
 // ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
 const menuState = new Map();
