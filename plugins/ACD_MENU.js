@@ -145,7 +145,7 @@ cmd({
     menuText += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['main']);
+      const imgBuf = await getBuffer(CAT_IMAGES['']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: menuText,
