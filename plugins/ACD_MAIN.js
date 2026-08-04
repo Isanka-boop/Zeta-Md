@@ -4,19 +4,19 @@ const { getBuffer } = require('../lib/functions');
 
 // ── Image Configurations (Consistent with ACD_MENU and ACD_VV styling) ──
 const MAIN_IMAGES = {
-  ping:    'https://shyra.edgeone.app/bot-img.jpg', // Ping/Pong command interface image
-  info:    'https://shyra.edgeone.app/bot-img.jpg', // Bot info presentation image
-  error:   'https://shyra.edgeone.app/bot-img.jpg', // Error fallback image
-  other:   'https://shyra.edgeone.app/bot-img.jpg'  // Default fallback
+  ping:    'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Ping/Pong command interface image
+  info:    'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Bot info presentation image
+  error:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Error fallback image
+  other:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ'  // Default fallback
 };
 
 // ── Hardcoded UI Brand Elements (Directly matching ACD_MENU.js) ──
-const BOT_NAME    = 'Ѕнιтѕυ 〽️𝓲𝓷𝓲';
+const BOT_NAME    = 'ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲';
 const BOT_VERSION = 'v3.0';
-const OWNER_NAME  = 'ᴅɪʟsʜᴀ∇';
+const OWNER_NAME  = 'ᴢᴇᴛᴀ∇';
 
 // ── Global Footer Content ────────────────────────────────────────
-const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ Ⲣ૦𝚅𝞔Ꮢ𝞔Ｄ 𝗕Ⲩ ＤƖ𐐛𝘚Η𝔸∇\n╰─────𓆩★𓆪──────╯`;
+const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ Ⲣ૦𝚅𝞔Ꮢ𝞔Ｄ 𝗕Ⲩ 𝐈𝐬𝐚𝐧𝐤𝐚∇\n╰─────𓆩★𓆪──────╯`;
 
 // ══════════════════════════════════════════════════════════════════
 // PING COMMAND
