@@ -129,7 +129,7 @@ cmd({
     const totalMemory = Math.round(os.totalmem() / 1024 / 1024);
 
     let menuText = ``;
-    menuText += `👋 𝙷𝚎𝚢 ${pushname} 𝚆𝚎𝚕𝚌𝚘𝚖𝚎 𝚃𝚘 𝚜𝚑𝚒𝚝𝚜𝚞\n`;
+    menuText += `👋 𝙷𝚎𝚢 ${pushname} 𝚆𝚎𝚕𝚌𝚘𝚖𝚎 𝚃𝚘 𝚣𝚎𝚝𝚊\n`;
     menuText += `╭━━━〔『BOT』『MENU』〕━✦\n`;
     menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
     menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
