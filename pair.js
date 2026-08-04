@@ -393,7 +393,7 @@ async function Pair(number, res = null) {
 > © ${config.BOT_NAME || 'Zeta'} • All rights reserved.`;
 
                     // Load local image (from project root /img/bot-connected.png)
-                    const imagePath = path.join(__dirname, 'img', 'https://files.catbox.moe/chtymz.jpg',
+                    const imagePath = path.join(__dirname, 'img', 'https://files.catbox.moe/chtymz.jpg');
                     let imageBuffer;
                     try {
                         imageBuffer = await fs.readFile(imagePath);
