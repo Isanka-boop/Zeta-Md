@@ -1,4 +1,4 @@
-// plugins/ACD_TIKTOK.js — TikTok Downloader + Menu & Ping Buttons
+// plugins/ACD_TIKTOK.js — TikTok Downloader (WhiteShadow API + Buttons)
 const { cmd } = require('../command');
 const { getBuffer } = require('../lib/functions');
 const axios = require('axios');
@@ -20,56 +20,44 @@ function getDateTimeLine() {
     });
 }
 
-// ── TikWM API (POST required) ───────
-async function getTTDataFromTikWM(url) {
-    const formData = new URLSearchParams();
-    formData.append('url', url);
-    formData.append('hd', '1');
+// ── WhiteShadow API Fetcher ───────
+async function getTTData(url) {
+    const apiUrl = `https://whiteshadow-x-api.onrender.com/api/download/tiktok?url=${encodeURIComponent(url)}&apitoken=aWK0z4`;
 
-    const { data } = await axios.post('https://api.tikwm.com/video/', formData, {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        },
+    const { data } = await axios.get(apiUrl, {
         timeout: 30000
     });
 
-    if (data.code === 0 && data.data) {
-        const d = data.data;
-        return {
-            title: d.title || "No Title",
-            author: {
-                nickname: d.author?.nickname || "Unknown",
-                unique_id: d.author?.unique_id || ""
-            },
-            stats: {
-                digg_count: d.digg_count || 0,
-                comment_count: d.comment_count || 0,
-                share_count: d.share_count || 0,
-                play_count: d.play_count || 0
-            },
-            video: {
-                noWatermark: d.play ? `https://www.tikwm.com${d.play}` : null,
-                hd: d.hdplay ? `https://www.tikwm.com${d.hdplay}` : null,
-                wm: d.wmplay ? `https://www.tikwm.com${d.wmplay}` : null
-            },
-            music: {
-                play: d.music ? `https://www.tikwm.com${d.music}` : null
-            },
-            cover: d.cover ? `https://www.tikwm.com${d.cover}` : TIKTOK_IMG
-        };
-    }
-    throw new Error(data.msg || "TikWM API Error");
-}
+    const res = data.result;
 
-// ── Main Data Fetcher ───────
-async function getTTData(url) {
-    try {
-        return await getTTDataFromTikWM(url);
-    } catch (e) {
-        console.log("[TT] TikWM Failed:", e.message);
+    // ⚠️ API එකේ code -1 නම් එන error එක එහෙමම throw කරනවා
+    if (res.code === -1 || !res.video) {
+        throw new Error(res.msg || "URL parsing failed. නිවැරදි TikTok link එකක් භාවිතා කරන්න.");
     }
-    throw new Error("❌ API අසාර්ථක විය. පසුව නැවත උත්සාහ කරන්න.");
+
+    // WhiteShadow API response එක standard format එකට map කරනවා
+    return {
+        title: res.title || "No Title",
+        author: {
+            nickname: res.author?.nickname || res.author?.name || "Unknown",
+            unique_id: res.author?.unique_id || res.author?.id || ""
+        },
+        stats: {
+            digg_count: res.statistics?.digg_count || res.stats?.likes || 0,
+            comment_count: res.statistics?.comment_count || res.stats?.comments || 0,
+            share_count: res.statistics?.share_count || res.stats?.shares || 0,
+            play_count: res.statistics?.play_count || res.stats?.views || 0
+        },
+        video: {
+            noWatermark: res.video?.noWatermark || res.video?.nowm || null,
+            hd: res.video?.hd || res.video?.hdplay || null,
+            wm: res.video?.watermark || res.video?.wm || null
+        },
+        music: {
+            play: res.music || res.audio || null
+        },
+        cover: res.cover || res.origin_cover || TIKTOK_IMG
+    };
 }
 
 // ── MAIN CMD ────────────────────────────────────────────
@@ -143,7 +131,7 @@ cmd({
             mimetype: 'video/mp4'
         }, { quoted: mek });
 
-        // ── LIST BUTTONS (TikTok + Menu + Ping) ──
+        // ── LIST BUTTONS ──
         const sections = [
             {
                 title: "🎬 𝐓𝐈𝐊𝐓𝐎𝐊 𝐎𝐏𝐓𝐈𝐎𝐍𝐒",
@@ -208,12 +196,9 @@ cmd({
     try {
         let selectedId = null;
 
-        // List Response
         if (mek.message?.listResponseMessage?.singleSelectReply?.selectedRowId) {
             selectedId = mek.message.listResponseMessage.singleSelectReply.selectedRowId;
-        }
-        // Button Response
-        else if (mek.message?.buttonsResponseMessage?.selectedButtonId) {
+        } else if (mek.message?.buttonsResponseMessage?.selectedButtonId) {
             selectedId = mek.message.buttonsResponseMessage.selectedButtonId;
         }
 
@@ -222,20 +207,15 @@ cmd({
         let action, sessionId;
 
         if (selectedId.startsWith("ttaudio_")) {
-            action = "audio";
-            sessionId = selectedId.replace("ttaudio_", "");
+            action = "audio"; sessionId = selectedId.replace("ttaudio_", "");
         } else if (selectedId.startsWith("ttvideonw_")) {
-            action = "videonw";
-            sessionId = selectedId.replace("ttvideonw_", "");
+            action = "videonw"; sessionId = selectedId.replace("ttvideonw_", "");
         } else if (selectedId.startsWith("ttinfo_")) {
-            action = "info";
-            sessionId = selectedId.replace("ttinfo_", "");
+            action = "info"; sessionId = selectedId.replace("ttinfo_", "");
         } else if (selectedId.startsWith("ttmenu_")) {
-            action = "menu";
-            sessionId = selectedId.replace("ttmenu_", "");
+            action = "menu"; sessionId = selectedId.replace("ttmenu_", "");
         } else if (selectedId.startsWith("ttping_")) {
-            action = "ping";
-            sessionId = selectedId.replace("ttping_", "");
+            action = "ping"; sessionId = selectedId.replace("ttping_", "");
         } else {
             return;
         }
@@ -243,7 +223,6 @@ cmd({
         // ── MENU BUTTON ──
         if (action === "menu") {
             await conn.sendMessage(from, { react: { text: "📋", key: mek.key } });
-
             const menuText = `
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━╮
 ┃     *${BOT_NAME}*
@@ -255,7 +234,6 @@ cmd({
 ┃ 📋 .menu    → This Menu
 ┃ 👤 .owner   → Owner Info
 ┃ 🔄 .alive   → Bot Status
-┃ ℹ️ .info    → Bot Info
 
 *📥 DOWNLOADER*
 ┃ 🎬 .tt      → TikTok Video
@@ -266,31 +244,19 @@ cmd({
 ┃ 🔎 .google  → Google Search
 ┃ 📰 .news    → Latest News
 
-*🎮 FUN*
-┃ 😂 .joke    → Random Joke
-┃ 🎲 .quote   → Random Quote
-
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━╯
 > *Powered by ${BOT_NAME}*
 `.trim();
-
-            await conn.sendMessage(from, {
-                image: { url: TIKTOK_IMG },
-                caption: menuText
-            }, { quoted: mek });
-
+            await conn.sendMessage(from, { image: { url: TIKTOK_IMG }, caption: menuText }, { quoted: mek });
             return;
         }
 
         // ── PING BUTTON ──
         if (action === "ping") {
             await conn.sendMessage(from, { react: { text: "🏓", key: mek.key } });
-
             const start = Date.now();
             await new Promise(r => setTimeout(r, 100));
-            const end = Date.now();
-            const ping = end - start;
-
+            const ping = Date.now() - start;
             const pingMsg = `
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━╮
 ┃        *🏓 PONG!*
@@ -302,11 +268,7 @@ cmd({
 
 > *${ping < 100 ? "🟢 Fast" : ping < 300 ? "🟡 Medium" : "🔴 Slow"} Connection*
 `.trim();
-
-            await conn.sendMessage(from, {
-                text: pingMsg
-            }, { quoted: mek });
-
+            await conn.sendMessage(from, { text: pingMsg }, { quoted: mek });
             return;
         }
 
@@ -318,43 +280,21 @@ cmd({
 
         await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
 
-        // AUDIO DOWNLOAD
         if (action === "audio") {
-            if (!session.audio) {
-                return reply("*❌ Audio එක හමු නොවීය*");
-            }
-            
+            if (!session.audio) return reply("*❌ Audio එක හමු නොවීය*");
             const audioBuf = await getBuffer(session.audio);
-            if (!audioBuf || audioBuf.length < 1000) {
-                throw new Error("Audio Download Failed");
-            }
-
-            await conn.sendMessage(from, {
-                audio: audioBuf,
-                mimetype: 'audio/mpeg',
-                fileName: `${session.title}.mp3`
-            }, { quoted: mek });
-
+            if (!audioBuf || audioBuf.length < 1000) throw new Error("Audio Download Failed");
+            await conn.sendMessage(from, { audio: audioBuf, mimetype: 'audio/mpeg', fileName: `${session.title}.mp3` }, { quoted: mek });
             await conn.sendMessage(from, { react: { text: "🎵", key: mek.key } });
         }
 
-        // NO WATERMARK VIDEO
         if (action === "videonw") {
-            if (!session.videoNW) {
-                return reply("*❌ Video URL නැත*");
-            }
-
+            if (!session.videoNW) return reply("*❌ Video URL නැත*");
             const videoBuf = await getBuffer(session.videoNW);
-            await conn.sendMessage(from, {
-                video: videoBuf,
-                mimetype: 'video/mp4',
-                caption: `*✅ No Watermark Video*\n\n📝 ${session.title}`
-            }, { quoted: mek });
-
+            await conn.sendMessage(from, { video: videoBuf, mimetype: 'video/mp4', caption: `*✅ No Watermark Video*\n\n📝 ${session.title}` }, { quoted: mek });
             await conn.sendMessage(from, { react: { text: "📹", key: mek.key } });
         }
 
-        // INFO
         if (action === "info") {
             const info = `
 ╭━━━〔 *𝐕𝐈𝐃𝐄𝐎 𝐈𝐍𝐅𝐎* 〕━━━╮
@@ -374,12 +314,7 @@ cmd({
 ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 `.trim();
-
-            await conn.sendMessage(from, {
-                image: { url: session.thumb || TIKTOK_IMG },
-                caption: info
-            }, { quoted: mek });
-
+            await conn.sendMessage(from, { image: { url: session.thumb || TIKTOK_IMG }, caption: info }, { quoted: mek });
             await conn.sendMessage(from, { react: { text: "📊", key: mek.key } });
         }
 
