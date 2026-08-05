@@ -16,7 +16,7 @@ const BOT_VERSION = 'v3.0';
 const OWNER_NAME  = 'ᴢᴇᴛᴀ∇';
 
 // ── Global Footer Content ────────────────────────────────────────
-const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ Ⲣ૦𝚅𝞔Ꮢ𝞔Ｄ 𝗕Ⲩ 𝐈𝐬𝐚𝐧𝐤𝐚∇\n╰─────𓆩★𓆪──────╯`;
+const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 𝐈𝐒𝐀𝐍𝐊𝐀 \n╰─────𓆩★𓆪──────╯`;
 
 // ══════════════════════════════════════════════════════════════════
 // PING COMMAND
@@ -36,7 +36,7 @@ cmd({
         let testMsg;
         
         try {
-            const imgBuf = await getBuffer(MAIN_IMAGES['ping']);
+            const imgBuf = await getBuffer(MAIN_IMAGES['']);
             testMsg = await conn.sendMessage(from, { image: imgBuf, caption: testingText }, { quoted: mek });
         } catch {
             testMsg = await reply(testingText);
@@ -45,7 +45,7 @@ cmd({
         const ping = Date.now() - start;
         
         // Finalized Pong performance block matching your unique system frames
-        let text = `╭━━━〔『PONG』『SPEED』〕━✦\n`;
+        let text = `╭━━━〔𝐏𝐎𝐍𝐆 𝐒𝐏𝐄𝐄𝐃〕━✦\n`;
         text += `├───────────\n`;
         text += `│  📍 \`Latency\`  : ${ping}ms\n`;
         text += `│  ⚡ \`Status\`   : Supercharged\n`;
@@ -86,7 +86,7 @@ cmd({
         const total = commands.filter(c => c.pattern && !c.dontAddCommandList).length;
         const usedMemory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
         
-        let text = `╭━━━〔『BOT』『INFO』〕━✦\n`;
+        let text = `╭━━━〔𝐁𝐎𝐓 𝐈𝐍𝐅𝐎〕━✦\n`;
         text += `├───────────\n`;
         text += `│  👾 \`Name\`     : ${BOT_NAME}\n`;
         text += `│  🔖 \`Version\`  : ${BOT_VERSION}\n`;
@@ -98,7 +98,7 @@ cmd({
         text += GLOBAL_FOOTER;
 
         try {
-            const imgBuf = await getBuffer(MAIN_IMAGES['info']);
+            const imgBuf = await getBuffer(MAIN_IMAGES['']);
             await conn.sendMessage(from, {
                 image: imgBuf,
                 caption: text,
