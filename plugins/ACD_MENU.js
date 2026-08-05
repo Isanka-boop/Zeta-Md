@@ -47,7 +47,7 @@ const CAT_REACTS = {
 };
 
 // ── Global Footer Content ────────────────────────────────────────
-const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ 𝙿σ𝚆є𝚁є𝙳 𝙱у ɪꜱᴀɴᴋᴀ∇\n╰─────𓆩★𓆪──────╯`;
+const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> 𝙿σ𝚆є𝚁є𝙳 𝙱у ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲\n╰─────𓆩★𓆪──────╯`;
 
 // ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
 const menuState = new Map();
@@ -129,7 +129,7 @@ cmd({
     const totalMemory = Math.round(os.totalmem() / 1024 / 1024);
 
     let menuText = ``;
-    menuText += `👋 𝙷𝚎𝚢 ${pushname} 𝚆𝚎𝚕𝚌𝚘𝚖𝚎 𝚃𝚘 𝚣𝚎𝚝𝚊\n`;
+    menuText += `👋 𝐇𝐞𝐲 ${pushname} 𝐖𝐞𝐥𝐜𝐨𝐦𝐞 𝐁𝐚𝐜𝐤 𝐓𝐨 \`𝐙𝐄𝐓𝐀\`\n`;
     menuText += `╭━━━〔 𝗠𝗘𝗡𝗨 𝗟𝗜𝗦𝗧〕━✦\n`;
     menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
     menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
