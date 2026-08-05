@@ -137,7 +137,7 @@ cmd({
     menuText += `│  🧠 \`RAM\`      : ${usedMemory}MB / ${totalMemory}MB\n`;
     menuText += `╰────────────╯\n\n`;
     menuText += `╔═══════════════════╗\n`;
-    menuText += `    📂  *SELECT A CATEGORY*   \n`;
+    menuText += `    📂  \`SELECT A CATEGORY\`   \n`;
     menuText += `╚═══════════════════╝\n`;
     menuText += catList;
     menuText += ` ┗━━━━━━━━━━━━✨\n`;
