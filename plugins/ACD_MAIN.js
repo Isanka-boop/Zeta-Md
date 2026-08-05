@@ -49,6 +49,7 @@ cmd({
         text += `├───────────\n`;
         text += `│  📍 \`Latency\`  : ${ping}ms\n`;
         text += `│  ⚡ \`Status\`   : Supercharged\n`;
+        text += `│  🫵 *අප හා සම්බන්ධ වී සිටින ඔබට බොහොම ස්තූතියි 🦋*   : Supercharged\n`;
         text += `╰────────────╯\n`;
         text += GLOBAL_FOOTER;
 
@@ -93,6 +94,7 @@ cmd({
         text += `│  📦 \`Cmds\`     : ${total}\n`;
         text += `│  ⚡ \`Runtime\`  : Node.js ${process.version}\n`;
         text += `│  🧠 \`RAM\`      : ${usedMemory} MB\n`;
+        text += `│  🥷 \`𝗢𝘄𝗻𝗲𝗿 : ɪꜱᴀɴᴋᴀ\`      : \n`;
         text += `╰────────────╯\n`;
         text += GLOBAL_FOOTER;
 
