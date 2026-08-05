@@ -32,7 +32,7 @@ cmd({
         const start = Date.now();
         
         // Initial premium latency testing layout
-        let testingText = `╭────「 🏓 PING 」\n│ ⏳ _Testing response speed..._\n╰───────────────────\n` + GLOBAL_FOOTER;
+        let testingText = `╭────「 🏓 PING 」\n│ 🫵 *Testing Speed...*\n 𝗛𝗶𝗴𝗵 𝗦𝗽𝗲𝗲𝗱 🚀 \n|╰───────────────────\n` + GLOBAL_FOOTER;
         let testMsg;
         
         try {
