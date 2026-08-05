@@ -53,10 +53,9 @@ cmd({
         text += GLOBAL_FOOTER;
 
         // Clean up initial test layout and push final performance status
-        if (testMsg?.key) await conn.sendMessage(from, { delete: testMsg.key });
 
         try {
-            const imgBuf = await getBuffer(MAIN_IMAGES['ping']);
+            const imgBuf = await getBuffer(MAIN_IMAGES['']);
             await conn.sendMessage(from, {
                 image: imgBuf,
                 caption: text,
