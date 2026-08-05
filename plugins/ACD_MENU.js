@@ -251,7 +251,7 @@ async function sendMainMenuUI(conn, mek, sender, from, prefix, pushname) {
   menuText += GLOBAL_FOOTER;
 
   await sendInteractive(conn, from, mek, {
-    imageUrl: CAT_IMAGES['main'],
+    imageUrl: CAT_IMAGES[''],
     caption: menuText,
     buttons: catButtons(cats, keys, sender)
   });
@@ -265,7 +265,7 @@ async function openCategoryUI(conn, mek, sender, from, state, catName, cmds) {
   await conn.sendMessage(from, { react: { text: reactionEmoji, key: mek.key } });
 
   const listText = buildCmdList(cmds, catName, state.prefix);
-  const catImgUrl = CAT_IMAGES[catName.toLowerCase()] || CAT_IMAGES['other'];
+  const catImgUrl = CAT_IMAGES[catName.toLowerCase()] || CAT_IMAGES[''];
 
   await sendInteractive(conn, from, mek, {
     imageUrl: catImgUrl,
@@ -281,7 +281,7 @@ async function openDetailUI(conn, mek, sender, from, state, c, catName) {
   await conn.sendMessage(from, { react: { text: '📌', key: mek.key } });
 
   const detailText = buildCmdDetail(c, state.prefix);
-  const detailImgUrl = CAT_IMAGES['detail'] || CAT_IMAGES['other'];
+  const detailImgUrl = CAT_IMAGES['detail'] || CAT_IMAGES[''];
 
   await sendInteractive(conn, from, mek, {
     imageUrl: detailImgUrl,
@@ -296,7 +296,7 @@ async function backToCategoryUI(conn, mek, sender, from, state) {
   scheduleExpiry(sender);
 
   const listText = buildCmdList(state.cmds, state.catName, state.prefix);
-  const catImgUrl = CAT_IMAGES[state.catName.toLowerCase()] || CAT_IMAGES['other'];
+  const catImgUrl = CAT_IMAGES[state.catName.toLowerCase()] || CAT_IMAGES[''];
 
   await sendInteractive(conn, from, mek, {
     imageUrl: catImgUrl,
@@ -428,7 +428,7 @@ cmd({
     text += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['main']);
+      const imgBuf = await getBuffer(CAT_IMAGES['']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: text,
