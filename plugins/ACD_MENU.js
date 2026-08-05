@@ -135,6 +135,7 @@ cmd({
     menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
     menuText += `│  🌀 \`Uptime\`   : ${hours}h ${minutes}m ${seconds}s\n`;
     menuText += `│  🧠 \`RAM\`      : ${usedMemory}MB / ${totalMemory}MB\n`;
+    menuText += `│  🥷 *𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗪𝗮𝘁𝗰𝗵𝗶𝗻𝗴*      : \n`;
     menuText += `╰────────────╯\n\n`;
     menuText += `╔═══════════════════╗\n`;
     menuText += `    📂  \`SELECT A CATEGORY\`   \n`;
@@ -278,7 +279,7 @@ cmd({
     const sec = Math.floor(uptime % 60);
     const totalCmds = commands.filter(c => c.pattern && !c.dontAddCommandList).length;
 
-    let text = `╭━━━〔『BOT』『STATUS』〕━✦\n`;
+    let text = `╭━━━〔 𝗔𝗟𝗜𝗩𝗘 〕━✦\n`;
     text += `│  🟢 \`Status\`   : Online & Running\n`;
     text += `│  🤖 \`Bot\`      : ${BOT_NAME} v${BOT_VERSION}\n`;
     text += `│  👋 \`Owner\`     : ${OWNER_NAME}\n`;
