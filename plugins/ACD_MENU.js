@@ -1,58 +1,47 @@
-// plugins/ACD_MENU.js — Full Custom UI Bot Menu System (Strict Stage Lockdown)
+// plugins/ACD_MENU.js — Full Custom UI Bot Menu System
 const { cmd, commands } = require('../command');
 const { getSetting, isUserLoaded, initEnvsettings } = require('../settings');
 const { getBuffer } = require('../lib/functions');
-const os = require('os');  // For RAM info
+const os = require('os');
 
-// ══════════════════════════════════════════════════════════════════
-// CONFIG — Change these to your own
-// ══════════════════════════════════════════════════════════════════
-const BOT_NAME    = 'ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲';
+// ══════════
+// CONFIG
+// ══════════════════════════════════════════
+const BOT_NAME = 'ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲';
 const BOT_VERSION = 'v3.0';
-const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ∇';
+const OWNER_NAME = 'ɪꜱᴀɴᴋᴀ∇';
 
-// ── All Menu Specific Images (All commands have image + reply) ─────
+// ── Images ─────
 const CAT_IMAGES = {
-  main:       'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Main Menu Image
-  alive:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Alive Image
-  detail:     'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Command Details Image
-  group:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  main_cat:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', 
-  settings:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  tools:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  download:   'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  ai:         'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  fun:        'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  search:     'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  anime:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  owner:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  textmaker:  'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
-  other:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ'  // Default fallback
+  main: 'https://files.catbox.moe/chtymz.jpg',
+  alive: 'https://files.catbox.moe/chtymz.jpg',
+  detail: 'https://files.catbox.moe/chtymz.jpg',
+  group: 'https://files.catbox.moe/chtymz.jpg',
+  main_cat: 'https://files.catbox.moe/chtymz.jpg',
+  settings: 'https://files.catbox.moe/chtymz.jpg',
+  tools: 'https://files.catbox.moe/chtymz.jpg',
+  download: 'https://files.catbox.moe/chtymz.jpg',
+  ai: 'https://files.catbox.moe/chtymz.jpg',
+  fun: 'https://files.catbox.moe/chtymz.jpg',
+  search: 'https://files.catbox.moe/chtymz.jpg',
+  anime: 'https://files.catbox.moe/chtymz.jpg',
+  owner: 'https://files.catbox.moe/chtymz.jpg',
+  textmaker: 'https://files.catbox.moe/chtymz.jpg',
+  other: 'https://files.catbox.moe/chtymz.jpg'
 };
 
-// ── Category Specific React Emojis ───────────────────────────────
+// ── React Emojis ───────────────────────────────
 const CAT_REACTS = {
-  group:      '👥',
-  main:       '🏠',
-  settings:   '⚙️',
-  tools:      '🔧',
-  download:   '⬇️',
-  ai:         '🤖',
-  fun:        '🎮',
-  search:     '🔍',
-  anime:      '🎎',
-  owner:      '👨🏻‍💻',
-  textmaker:  '🗒️',
-  other:      '✨'
+  group: '👥', main: '🏠', settings: '⚙️', tools: '🔧', download: '⬇️',
+  ai: '🤖', fun: '🎮', search: '🔍', anime: '🎎', owner: '👨🏻‍💻', textmaker: '🗒️', other: '✨'
 };
 
-// ── Global Footer Content ────────────────────────────────────────
-const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ 𝙿σ𝚆є𝚁є𝙳 𝙱у ɪꜱᴀɴᴋᴀ∇\n╰─────𓆩★𓆪──────╯`;
+const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> ㋛ 𝙿σ𝚆є𝚁є𝙳 𝙱у ${OWNER_NAME}\n╰─────𓆩★𓆪──────╯`;
 
-// ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
+// ── Pending menu state ──
 const menuState = new Map();
 
-// ══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════════════════════════
 
@@ -67,274 +56,161 @@ function groupByCategory() {
   return cats;
 }
 
+function getSystemInfo(){
+    const total = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
+    const used = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
+    const cpu = os.cpus()[0].model;
+    return { total, used, cpu };
+}
+
 function buildCategoryList(cats) {
   const keys = Object.keys(cats);
-  let text = '';
+  let text = `*╭┈───〔 ${BOT_NAME} 𝐌𝐄𝐍𝐔 〕┈───⊷*\n`;
+  text += `*├✦ 𝐕𝐞𝐫𝐬𝐢𝐨𝐧:* *${BOT_VERSION}*\n`;
+  text += `*├✦ 𝐎𝐰𝐧𝐞𝐫:* *${OWNER_NAME}*\n`;
+  text += `*├✦ 𝐂𝐚𝐭𝐞𝐠𝐨𝐫𝐢𝐞𝐬:* *${keys.length}*\n`;
+  text += `*├✦ 𝐂𝐨𝐦𝐦𝐚𝐧𝐝𝐬:* *${commands.length}*\n`;
+  text += `*╰───────────────────⊷*\n\n`;
+
+  text += `*📌 𝐒𝐄𝐋𝐄𝐂𝐓 𝐀 𝐂𝐀𝐓𝐄𝐆𝐎𝐑𝐘*\n\n`;
+
   keys.forEach((cat, i) => {
-    const numStr = (i + 1) < 10 ? `*${i + 1}.* ` : `*${i + 1}.*`;
-    text += `${numStr}│❯❯◦ ${cat.toUpperCase()} MENU\n`;
+    const emoji = CAT_REACTS[cat] || '✨';
+    text += `*${i + 1}.* ${emoji} *${cat.toUpperCase()}* \`(${cats[cat].length} cmds)\`\n`;
   });
+
+  text += `\n*📝 Reply with a number to open category!*\n`;
+  text += GLOBAL_FOOTER;
   return { text, keys };
 }
 
 function buildCmdList(cmds, catName, prefix) {
-  let text = `╭──「 ${catName.toUpperCase()} COMMANDS 」\n`;
+  let text = `*╭┈───〔 ${catName.toUpperCase()} 𝐂𝐌𝐃𝐒 〕┈───⊷*\n`;
+  text += `*├✦ 𝐓𝐨𝐭𝐚𝐥:* *${cmds.length} 𝐂𝐨𝐦𝐦𝐚𝐧𝐝𝐬*\n`;
+  text += `*╰───────────────────⊷*\n\n`;
+
   cmds.forEach((c, i) => {
-    text += `│ ${i + 1}. \`${prefix}${c.pattern}\`\n`;
-    if (c.desc) text += `│    ─ _${c.desc}_\n`;
+    text += `*${i + 1}.* \`${prefix}${c.pattern}\`\n`;
+    if (c.desc) text += ` └─ _${c.desc}_\n`;
   });
-  text += `╰─────────────\n\n`;
-  text += `📝 *Reply with a number to see full command details!*\n`;
+
+  text += `\n*📝 Reply with a number for details!*\n`;
   text += GLOBAL_FOOTER;
   return text;
 }
 
 function buildCmdDetail(c, prefix) {
-  let text = `╔══════════════════════╗\n`;
-  text += `║  📌 COMMAND DETAILS  ║\n`;
-  text += `╚══════════════════════╝\n\n`;
-  text += `🔹 *Command:* \`${prefix}${c.pattern}\`\n`;
-  if (c.desc)      text += `📝 *Info:* ${c.desc}\n`;
-  if (c.category)  text += `📂 *Category:* ${c.category.toUpperCase()}\n`;
-  if (c.alias?.length) text += `🔁 *Aliases:* ${c.alias.map(a => `\`${prefix}${a}\``).join(', ')}\n`;
+  let text = `*╭┈───〔 𝐂𝐎𝐌𝐀𝐍𝐃 𝐃𝐄𝐓𝐀𝐈𝐋𝐒 〕┈───⊷*\n`;
+  text += `*├✦ 𝐂𝐨𝐦𝐦𝐚𝐧𝐝:* *\`${prefix}${c.pattern}\`*\n`;
+  if (c.desc) text += `*├✦ 𝐃𝐞𝐬𝐜:* *${c.desc}*\n`;
+  if (c.category) text += `*├✦ 𝐂𝐚𝐭𝐞𝐠𝐨𝐫𝐲:* *${c.category.toUpperCase()}*\n`;
+  if (c.alias?.length) text += `*├✦ 𝐀𝐥𝐢𝐚𝐬:* *${c.alias.map(a => `${prefix}${a}`).join(', ')}*\n`;
+  text += `*╰───────────────────⊷*\n`;
   text += GLOBAL_FOOTER;
   return text;
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
 // MAIN MENU COMMAND
 // ══════════════════════════════════════════════════════════════════
 cmd({
   pattern: 'menu',
   alias: ['help', 'cmds', 'commands'],
-  desc: 'Interactive bot menu with image',
-  category: 'main',
-  react: '🎲',
+  desc: "Show bot menu",
+  category: "main",
+  react: "🏠",
   filename: __filename
-}, async (conn, mek, m, { sender, from, pushname, prefix, reply }) => {
-  try {
-    if (!isUserLoaded(sender)) await initEnvsettings(sender);
+}, async (conn, mek, m, { from, prefix, reply }) => {
+    try {
+        await conn.sendMessage(from, { react: { text: "🏠", key: mek.key } });
+
+        const cats = groupByCategory();
+        const { text, keys } = buildCategoryList(cats);
+        const img = await getBuffer(CAT_IMAGES.main);
+
+        menuState.set(m.sender, { stage: 'category', keys, prefix });
+
+        await conn.sendMessage(from, {
+            image: img,
+            caption: text
+        }, { quoted: mek });
+
+        // List Buttons
+        const sections = [{
+            title: "𝐒𝐄𝐋𝐄𝐂𝐓 𝐂𝐀𝐓𝐄𝐆𝐎𝐑𝐘",
+            rows: keys.map((cat, i) => ({
+                title: `${CAT_REACTS[cat] || '✨'} ${cat.toUpperCase()}`,
+                description: `${cats[cat].length} Commands`,
+                id: `menu_cat_${i+1}`
+            }))
+        }];
+
+        await conn.sendMessage(from, {
+            text: `*𝐎𝐫 𝐮𝐬𝐞 𝐭𝐡𝐞 𝐛𝐮𝐭𝐭𝐨𝐧 𝐛𝐞𝐥𝐨𝐰 👇*`,
+            footer: `> ${BOT_NAME}`,
+            title: "𝐌𝐀𝐈𝐍 𝐌𝐄𝐍𝐔",
+            buttonText: "𝐎𝐏𝐄𝐍 𝐌𝐄𝐍𝐔",
+            sections
+        }, { quoted: mek });
+
+    } catch (e) {
+        console.error(e);
+        reply(`*❌ Error:* ${e.message}`);
+    }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// MENU HANDLER
+// ══════════════════════════════════════════════════════════
+cmd({
+    on: "text",
+    fromMe: false
+}, async (conn, mek, m, { body, sender, prefix, reply }) => {
+    const state = menuState.get(sender);
+    if (!state) return;
+
+    let selection = body;
+    if (mek.message?.listResponseMessage) {
+        selection = mek.message.listResponseMessage.singleSelectReply.selectedRowId;
+        selection = selection.replace('menu_cat_', '');
+    }
+
+    const num = parseInt(selection);
+    if (isNaN(num)) return;
 
     const cats = groupByCategory();
-    const { text: catList, keys } = buildCategoryList(cats);
+    const keys = Object.keys(cats);
 
-    menuState.set(sender, { stage: 'main', keys, cats, prefix });
-    setTimeout(() => menuState.delete(sender), 120000); // 2 min timeout
-
-    const uptime = Math.floor(process.uptime());
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
-    const usedMemory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-    const totalMemory = Math.round(os.totalmem() / 1024 / 1024);
-
-    let menuText = ``;
-    menuText += `👋 𝙷𝚎𝚢 ${pushname} 𝚆𝚎𝚕𝚌𝚘𝚖𝚎 𝚃𝚘 𝚣𝚎𝚝𝚊\n`;
-    menuText += `╭━━━〔BOT MENU〕━✦\n`;
-    menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
-    menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
-    menuText += `│  🌀 \`Uptime\`   : ${hours}h ${minutes}m ${seconds}s\n`;
-    menuText += `│  🧠 \`RAM\`      : ${usedMemory}MB / ${totalMemory}MB\n`;
-    menuText += `│  🥷 *𝗧𝗵𝗮𝗻𝗸𝘀 𝗙𝗼𝗿 𝗪𝗮𝘁𝗰𝗵𝗶𝗻𝗴*      : \n`;
-    menuText += `╰────────────╯\n\n`;
-    menuText += `╔═══════════════════╗\n`;
-    menuText += `    📂  \`SELECT A CATEGORY\`   \n`;
-    menuText += `╚═══════════════════╝\n`;
-    menuText += catList;
-    menuText += ` ┗━━━━━━━━━━━━✨\n`;
-    menuText += `📝 *Reply with the category number.*\n`;
-    menuText += GLOBAL_FOOTER;
-
-    try {
-      const imgBuf = await getBuffer(CAT_IMAGES['']);
-      await conn.sendMessage(from, {
-        image: imgBuf,
-        caption: menuText,
-        mimetype: 'image/jpeg'
-      }, { quoted: mek });
-    } catch {
-      await conn.sendMessage(from, { text: menuText }, { quoted: mek });
-    }
-
-  } catch (e) { reply(`❌ Error: ${e.message}`); }
-});
-
-// ══════════════════════════════════════════════════════════════════
-// NUMBER REPLY LISTENER — Handles menu navigation (Strict Stage Lockdown)
-// ══════════════════════════════════════════════════════════════════
-cmd({
-  on: 'body',
-  dontAddCommandList: true,
-  filename: __filename
-}, async (conn, mek, m, { sender, body, from, reply, prefix }) => {
-  try {
-    if (!menuState.has(sender)) return;
-
-    const input = body.trim();
-    const state = menuState.get(sender);
-
-    // 0 அழுத்தினால் எந்த ரியாக்‌ஷனும் நடக்காது (முற்றிலும் புறக்கணிக்கப்படும்)
-    if (input === '0') return;
-
-    // ── Stage: main → select category ────────────────────────────
-    if (state.stage === 'main') {
-      const num = parseInt(input);
-      if (isNaN(num) || num < 1 || num > state.keys.length) return;
-
-      const catName = state.keys[num - 1];
-      const cmds    = state.cats[catName];
-      
-      // Stage மாறும்: இனி மெயின் மெனு எண்கள் வேலை செய்யாது
-      menuState.set(sender, { ...state, stage: 'category', catName, cmds });
-
-      const reactionEmoji = CAT_REACTS[catName.toLowerCase()] || CAT_REACTS['other'];
-      await conn.sendMessage(from, { react: { text: reactionEmoji, key: mek.key } });
-
-      const listText = buildCmdList(cmds, catName, state.prefix);
-      const catImgUrl = CAT_IMAGES[catName.toLowerCase()] || CAT_IMAGES['other'];
-
-      try {
-        const imgBuf = await getBuffer(catImgUrl);
-        await conn.sendMessage(from, {
-          image: imgBuf,
-          caption: listText,
-          mimetype: 'image/jpeg'
-        }, { quoted: mek });
-      } catch {
-        reply(listText);
-      }
-      return;
-    }
-
-    // ── Stage: category → select command ─────────────────────────
+    // STAGE 1: Category Select
     if (state.stage === 'category') {
-      const num = parseInt(input);
-      // ஓபனில் இருக்கும் கேட்டகரியின் கமாண்ட் எண்ணிக்கையை தாண்டி அழுத்தினால் block ஆகும்
-      if (isNaN(num) || num < 1 || num > state.cmds.length) return;
+        const catName = keys[num - 1];
+        if (!catName) return reply("*❌ Invalid Number*");
 
-      const cmd  = state.cmds[num - 1];
-      menuState.set(sender, { ...state, stage: 'detail', cmd });
+        const cmds = cats[catName];
+        const text = buildCmdList(cmds, catName, prefix);
+        const img = await getBuffer(CAT_IMAGES[catName] || CAT_IMAGES.other);
 
-      await conn.sendMessage(from, { react: { text: '📌', key: mek.key } });
+        menuState.set(sender, { stage: 'cmd', cmds, catName, prefix });
 
-      const detailText = buildCmdDetail(cmd, state.prefix);
-      const detailImgUrl = CAT_IMAGES['detail'] || CAT_IMAGES['other'];
-
-      try {
-        const imgBuf = await getBuffer(detailImgUrl);
         await conn.sendMessage(from, {
-          image: imgBuf,
-          caption: detailText,
-          mimetype: 'image/jpeg'
+            image: img,
+            caption: text
         }, { quoted: mek });
-      } catch {
-        reply(detailText);
-      }
-      return;
     }
 
-    // ── Stage: detail → Show category list again with Image + Reply ──
-    if (state.stage === 'detail') {
-      const num = parseInt(input);
-      if (isNaN(num)) return;
-      
-      const listText = buildCmdList(state.cmds, state.catName, state.prefix);
-      menuState.set(sender, { ...state, stage: 'category' });
+    // STAGE 2: Command Detail
+    else if (state.stage === 'cmd') {
+        const cmdObj = state.cmds[num - 1];
+        if (!cmdObj) return reply("*❌ Invalid Number*");
 
-      const catImgUrl = CAT_IMAGES[state.catName.toLowerCase()] || CAT_IMAGES['other'];
+        const text = buildCmdDetail(cmdObj, prefix);
+        const img = await getBuffer(CAT_IMAGES[state.catName] || CAT_IMAGES.detail);
 
-      try {
-        const imgBuf = await getBuffer(catImgUrl);
+        menuState.set(sender, { stage: null }); // reset
+
         await conn.sendMessage(from, {
-          image: imgBuf,
-          caption: listText,
-          mimetype: 'image/jpeg'
+            image: img,
+            caption: text
         }, { quoted: mek });
-      } catch {
-        reply(listText);
-      }
-      return;
     }
-
-  } catch (e) {
-    console.error('[MENU NAV ERROR]', e);
-  }
 });
-
-// ══════════════════════════════════════════════════════════════════
-// ALIVE COMMAND — Hacker Font Backticks + Image + Reply + Global Footer
-// ══════════════════════════════════════════════════════════════════
-cmd({
-  pattern: 'alive',
-  alias: ['status', 'bot'],
-  desc: 'Check if bot is alive',
-  category: 'main',
-  react: '❤️‍🩹',
-  filename: __filename
-}, async (conn, mek, m, { from, pushname, reply }) => {
-  try {
-    const uptime = process.uptime();
-    const h = Math.floor(uptime / 3600);
-    const min = Math.floor((uptime % 3600) / 60);
-    const sec = Math.floor(uptime % 60);
-    const totalCmds = commands.filter(c => c.pattern && !c.dontAddCommandList).length;
-
-    let text = `╭━━━〔 𝗔𝗟𝗜𝗩𝗘 〕━✦\n`;
-    text += `│  🟢 \`Status\`   : Online & Running\n`;
-    text += `│  🤖 \`Bot\`      : ${BOT_NAME} v${BOT_VERSION}\n`;
-    text += `│  👋 \`Owner\`     : ${OWNER_NAME}\n`;
-    text += `│  ⏱️ \`Uptime\`   : ${h}h ${min}m ${sec}s\n`;
-    text += `│  📊 \`Cmds\`     : ${totalCmds}\n`;
-    text += `╰────────────╯\n\n`;
-    text += `_💡 Use \`.menu\` to open the interactive UI_\n`;
-    text += GLOBAL_FOOTER;
-
-    try {
-      const imgBuf = await getBuffer(CAT_IMAGES['']);
-      await conn.sendMessage(from, {
-        image: imgBuf,
-        caption: text,
-        mimetype: 'image/jpeg'
-      }, { quoted: mek });
-    } catch {
-      reply(text);
-    }
-  } catch (e) { reply(`❌ Error: ${e.message}`); }
-});
-
-// ══════════════════════════════════════════════════════════════════
-// HELP COMMAND — Image + Reply + Global Footer
-// ══════════════════════════════════════════════════════════════════
-cmd({
-  pattern: 'how',
-  alias: ['usage', 'cmdinfo'],
-  desc: 'Get details for a command. Usage: /how <command>',
-  category: 'main',
-  react: '❓',
-  filename: __filename
-}, async (conn, mek, m, { from, reply, q, prefix }) => {
-  try {
-    if (!q) return reply(`❌ Usage: /how <command name>\nExample: /how ytmp3`);
-    const name = q.toLowerCase().replace(/^[^a-z0-9]/g, '');
-    const found = commands.find(c =>
-      c.pattern === name ||
-      (c.alias && c.alias.includes(name))
-    );
-    if (!found) return reply(`❌ Command *${name}* not found.\nUse \`/menu\` to browse all commands.`);
-    
-    const detailText = buildCmdDetail(found, prefix);
-    const detailImgUrl = CAT_IMAGES['detail'] || CAT_IMAGES['other'];
-
-    try {
-      const imgBuf = await getBuffer(detailImgUrl);
-      await conn.sendMessage(from, {
-        image: imgBuf,
-        caption: detailText,
-        mimetype: 'image/jpeg'
-      }, { quoted: mek });
-    } catch {
-      reply(detailText);
-    }
-  } catch (e) { reply(`❌ Error: ${e.message}`); }
-});
-
