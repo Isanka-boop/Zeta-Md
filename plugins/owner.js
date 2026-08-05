@@ -7,7 +7,7 @@ const OWNER_IMG = 'https://files.catbox.moe/1b8k5v.jpg'; // Owner pic එකක�
 cmd({
     pattern: "owner",
     alias: ["creator", "dev"],
-    react: "👑",
+    react: "🥷",
     desc: "Get owner contact info",
     category: "main",
     filename: __filename
