@@ -1,15 +1,8 @@
 // plugins/ACD_MENU.js — Full Custom UI Bot Menu System (Strict Stage Lockdown)
-// Now with real tappable WhatsApp buttons (native-flow), with the original
-// numbered-text replies kept working as a fallback.
 const { cmd, commands } = require('../command');
 const { getSetting, isUserLoaded, initEnvsettings } = require('../settings');
 const { getBuffer } = require('../lib/functions');
 const os = require('os');  // For RAM info
-const {
-  proto,
-  generateWAMessageFromContent,
-  prepareWAMessageMedia
-} = require('@whiskeysockets/baileys');
 
 // ══════════════════════════════════════════════════════════════════
 // CONFIG — Change these to your own
@@ -58,9 +51,6 @@ const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> �
 
 // ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
 const menuState = new Map();
-function scheduleExpiry(sender) {
-  setTimeout(() => menuState.delete(sender), 120000); // 2 min timeout
-}
 
 // ══════════════════════════════════════════════════════════════════
 // HELPERS
@@ -94,7 +84,7 @@ function buildCmdList(cmds, catName, prefix) {
     if (c.desc) text += `│    ─ _${c.desc}_\n`;
   });
   text += `╰─────────────\n\n`;
-  text += `📝 *Tap a command below, or reply with a number!*\n`;
+  text += `📝 *Reply with a number to see full command details!*\n`;
   text += GLOBAL_FOOTER;
   return text;
 }
@@ -112,200 +102,6 @@ function buildCmdDetail(c, prefix) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// BUTTON BUILDERS — native-flow button payloads per stage
-// ══════════════════════════════════════════════════════════════════
-
-function catButtons(cats, keys, sender) {
-  const rows = keys.map((cat, i) => ({
-    title: `${i + 1}. ${cat.toUpperCase()}`,
-    id: `menu_cat::${cat}::${sender}`,
-    description: `${cats[cat].length} command${cats[cat].length === 1 ? '' : 's'}`
-  }));
-  return [{
-    name: 'single_select',
-    buttonParamsJson: JSON.stringify({
-      title: '📂 Tap to choose a category',
-      sections: [{ title: 'Categories', rows }]
-    })
-  }];
-}
-
-function cmdButtons(cmds, catName, prefix, sender) {
-  const rows = cmds.map((c, i) => ({
-    title: `${i + 1}. ${prefix}${c.pattern}`,
-    id: `menu_cmd::${catName}::${i}::${sender}`,
-    description: c.desc || ''
-  }));
-  return [
-    {
-      name: 'single_select',
-      buttonParamsJson: JSON.stringify({
-        title: `📜 ${catName.toUpperCase()} commands`,
-        sections: [{ title: catName.toUpperCase(), rows }]
-      })
-    },
-    {
-      name: 'quick_reply',
-      buttonParamsJson: JSON.stringify({ display_text: '🔙 Back to Categories', id: `menu_back::main::${sender}` })
-    }
-  ];
-}
-
-function detailButtons(catName, sender) {
-  return [
-    { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: `🔙 Back to ${catName.toUpperCase()}`, id: `menu_back::category::${sender}` }) },
-    { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '🏠 Main Menu', id: `menu_back::main::${sender}` }) }
-  ];
-}
-
-// ══════════════════════════════════════════════════════════════════
-// sendInteractive — builds a real native-flow interactive message
-// (image header + body + footer + buttons) and relays it directly.
-// Falls back to a plain image/caption (numbered-text still works via
-// the on:'body' listener below) if anything above fails.
-// ══════════════════════════════════════════════════════════════════
-async function sendInteractive(conn, from, mek, { imageUrl, caption, buttons }) {
-  try {
-    let header;
-    try {
-      const imgBuf = await getBuffer(imageUrl);
-      const media = await prepareWAMessageMedia(
-        { image: imgBuf },
-        { upload: conn.waUploadToServer }
-      );
-      header = proto.Message.InteractiveMessage.Header.fromObject({
-        hasMediaAttachment: true,
-        ...media
-      });
-    } catch (imgErr) {
-      header = proto.Message.InteractiveMessage.Header.fromObject({
-        title: '', hasMediaAttachment: false
-      });
-    }
-
-    const interactiveMessage = proto.Message.InteractiveMessage.fromObject({
-      body: proto.Message.InteractiveMessage.Body.fromObject({ text: caption }),
-      footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: GLOBAL_FOOTER }),
-      header,
-      nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons })
-    });
-
-    const waMsg = generateWAMessageFromContent(from, {
-      viewOnceMessage: {
-        message: {
-          messageContextInfo: {
-            deviceListMetadataVersion: 2,
-            deviceListMetadata: {}
-          },
-          interactiveMessage
-        }
-      }
-    }, { quoted: mek, userJid: conn.user.id });
-
-    await conn.relayMessage(from, waMsg.message, { messageId: waMsg.key.id });
-    return true;
-  } catch (e) {
-    console.error('[MENU BUTTON SEND ERROR]', e);
-    try {
-      const imgBuf = await getBuffer(imageUrl);
-      await conn.sendMessage(from, { image: imgBuf, caption, mimetype: 'image/jpeg' }, { quoted: mek });
-    } catch {
-      await conn.sendMessage(from, { text: caption }, { quoted: mek });
-    }
-    return false;
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// STAGE RENDERERS — shared by the initial command and button taps
-// ══════════════════════════════════════════════════════════════════
-
-async function sendMainMenuUI(conn, mek, sender, from, prefix, pushname) {
-  const cats = groupByCategory();
-  const { text: catList, keys } = buildCategoryList(cats);
-
-  menuState.set(sender, { stage: 'main', keys, cats, prefix });
-  scheduleExpiry(sender);
-
-  const uptime = Math.floor(process.uptime());
-  const hours = Math.floor(uptime / 3600);
-  const minutes = Math.floor((uptime % 3600) / 60);
-  const seconds = Math.floor(uptime % 60);
-  const usedMemory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-  const totalMemory = Math.round(os.totalmem() / 1024 / 1024);
-
-  let menuText = ``;
-  menuText += `👋 𝙷𝚎𝚢 ${pushname || 'User'} 𝚆𝚎𝚕𝚌𝚘𝚖𝚎 𝚃𝚘 𝚣𝚎𝚝𝚊\n`;
-  menuText += `╭━━━〔『BOT』『MENU』〕━✦\n`;
-  menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
-  menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
-  menuText += `│  🌀 \`Uptime\`   : ${hours}h ${minutes}m ${seconds}s\n`;
-  menuText += `│  🧠 \`RAM\`      : ${usedMemory}MB / ${totalMemory}MB\n`;
-  menuText += `╰────────────╯\n\n`;
-  menuText += `╔═══════════════════╗\n`;
-  menuText += `    📂  *SELECT A CATEGORY*   \n`;
-  menuText += `╚═══════════════════╝\n`;
-  menuText += catList;
-  menuText += ` ┗━━━━━━━━━━━━✨\n`;
-  menuText += `📝 *Tap a category below, or reply with its number.*\n`;
-  menuText += GLOBAL_FOOTER;
-
-  await sendInteractive(conn, from, mek, {
-    imageUrl: CAT_IMAGES[''],
-    caption: menuText,
-    buttons: catButtons(cats, keys, sender)
-  });
-}
-
-async function openCategoryUI(conn, mek, sender, from, state, catName, cmds) {
-  menuState.set(sender, { ...state, stage: 'category', catName, cmds });
-  scheduleExpiry(sender);
-
-  const reactionEmoji = CAT_REACTS[catName.toLowerCase()] || CAT_REACTS['other'];
-  await conn.sendMessage(from, { react: { text: reactionEmoji, key: mek.key } });
-
-  const listText = buildCmdList(cmds, catName, state.prefix);
-  const catImgUrl = CAT_IMAGES[catName.toLowerCase()] || CAT_IMAGES[''];
-
-  await sendInteractive(conn, from, mek, {
-    imageUrl: catImgUrl,
-    caption: listText,
-    buttons: cmdButtons(cmds, catName, state.prefix, sender)
-  });
-}
-
-async function openDetailUI(conn, mek, sender, from, state, c, catName) {
-  menuState.set(sender, { ...state, stage: 'detail', cmd: c, catName });
-  scheduleExpiry(sender);
-
-  await conn.sendMessage(from, { react: { text: '📌', key: mek.key } });
-
-  const detailText = buildCmdDetail(c, state.prefix);
-  const detailImgUrl = CAT_IMAGES['detail'] || CAT_IMAGES[''];
-
-  await sendInteractive(conn, from, mek, {
-    imageUrl: detailImgUrl,
-    caption: detailText,
-    buttons: detailButtons(catName, sender)
-  });
-}
-
-async function backToCategoryUI(conn, mek, sender, from, state) {
-  if (!state.catName || !state.cmds) return;
-  menuState.set(sender, { ...state, stage: 'category' });
-  scheduleExpiry(sender);
-
-  const listText = buildCmdList(state.cmds, state.catName, state.prefix);
-  const catImgUrl = CAT_IMAGES[state.catName.toLowerCase()] || CAT_IMAGES[''];
-
-  await sendInteractive(conn, from, mek, {
-    imageUrl: catImgUrl,
-    caption: listText,
-    buttons: cmdButtons(state.cmds, state.catName, state.prefix, sender)
-  });
-}
-
-// ══════════════════════════════════════════════════════════════════
 // MAIN MENU COMMAND
 // ══════════════════════════════════════════════════════════════════
 cmd({
@@ -313,17 +109,57 @@ cmd({
   alias: ['help', 'cmds', 'commands'],
   desc: 'Interactive bot menu with image',
   category: 'main',
-  react: '📁',
+  react: '🎲',
   filename: __filename
 }, async (conn, mek, m, { sender, from, pushname, prefix, reply }) => {
   try {
     if (!isUserLoaded(sender)) await initEnvsettings(sender);
-    await sendMainMenuUI(conn, mek, sender, from, prefix, pushname);
+
+    const cats = groupByCategory();
+    const { text: catList, keys } = buildCategoryList(cats);
+
+    menuState.set(sender, { stage: 'main', keys, cats, prefix });
+    setTimeout(() => menuState.delete(sender), 120000); // 2 min timeout
+
+    const uptime = Math.floor(process.uptime());
+    const hours = Math.floor(uptime / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
+    const usedMemory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+    const totalMemory = Math.round(os.totalmem() / 1024 / 1024);
+
+    let menuText = ``;
+    menuText += `👋 𝙷𝚎𝚢 ${pushname} 𝚆𝚎𝚕𝚌𝚘𝚖𝚎 𝚃𝚘 𝚣𝚎𝚝𝚊\n`;
+    menuText += `╭━━━〔BOT MENU〕━✦\n`;
+    menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
+    menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
+    menuText += `│  🌀 \`Uptime\`   : ${hours}h ${minutes}m ${seconds}s\n`;
+    menuText += `│  🧠 \`RAM\`      : ${usedMemory}MB / ${totalMemory}MB\n`;
+    menuText += `╰────────────╯\n\n`;
+    menuText += `╔═══════════════════╗\n`;
+    menuText += `    📂  *SELECT A CATEGORY*   \n`;
+    menuText += `╚═══════════════════╝\n`;
+    menuText += catList;
+    menuText += ` ┗━━━━━━━━━━━━✨\n`;
+    menuText += `📝 *Reply with the category number.*\n`;
+    menuText += GLOBAL_FOOTER;
+
+    try {
+      const imgBuf = await getBuffer(CAT_IMAGES['']);
+      await conn.sendMessage(from, {
+        image: imgBuf,
+        caption: menuText,
+        mimetype: 'image/jpeg'
+      }, { quoted: mek });
+    } catch {
+      await conn.sendMessage(from, { text: menuText }, { quoted: mek });
+    }
+
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
 
 // ══════════════════════════════════════════════════════════════════
-// NAVIGATION LISTENER — real button taps + legacy numbered replies
+// NUMBER REPLY LISTENER — Handles menu navigation (Strict Stage Lockdown)
 // ══════════════════════════════════════════════════════════════════
 cmd({
   on: 'body',
@@ -333,65 +169,90 @@ cmd({
   try {
     if (!menuState.has(sender)) return;
 
-    const raw = (body || '').trim();
+    const input = body.trim();
     const state = menuState.get(sender);
 
-    // ── Real button taps (native-flow ids from sendInteractive) ────
-    if (raw.startsWith('menu_cat::') || raw.startsWith('menu_cmd::') || raw.startsWith('menu_back::')) {
-      const parts = raw.split('::');
-      const kind = parts[0];
-      const ownerId = parts[parts.length - 1];
-      if (ownerId !== sender) return; // only the requester can drive their own session
-      console.log('[MENU BUTTON TAP]', { raw, sender });
+    // 0 அழுத்தினால் எந்த ரியாக்‌ஷனும் நடக்காது (முற்றிலும் புறக்கணிக்கப்படும்)
+    if (input === '0') return;
 
-      if (kind === 'menu_back') {
-        const target = parts[1];
-        if (target === 'main') return sendMainMenuUI(conn, mek, sender, from, state.prefix, mek.pushName || 'User');
-        if (target === 'category') return backToCategoryUI(conn, mek, sender, from, state);
-        return;
-      }
+    // ── Stage: main → select category ────────────────────────────
+    if (state.stage === 'main') {
+      const num = parseInt(input);
+      if (isNaN(num) || num < 1 || num > state.keys.length) return;
 
-      if (kind === 'menu_cat') {
-        const catName = parts[1];
-        const cmds = state.cats?.[catName];
-        if (!cmds) return;
-        return openCategoryUI(conn, mek, sender, from, state, catName, cmds);
-      }
+      const catName = state.keys[num - 1];
+      const cmds    = state.cats[catName];
+      
+      // Stage மாறும்: இனி மெயின் மெனு எண்கள் வேலை செய்யாது
+      menuState.set(sender, { ...state, stage: 'category', catName, cmds });
 
-      if (kind === 'menu_cmd') {
-        const catName = parts[1];
-        const idx = parseInt(parts[2]);
-        const cmds = state.cats?.[catName];
-        const c = cmds?.[idx];
-        if (!c) return;
-        return openDetailUI(conn, mek, sender, from, state, c, catName);
+      const reactionEmoji = CAT_REACTS[catName.toLowerCase()] || CAT_REACTS['other'];
+      await conn.sendMessage(from, { react: { text: reactionEmoji, key: mek.key } });
+
+      const listText = buildCmdList(cmds, catName, state.prefix);
+      const catImgUrl = CAT_IMAGES[catName.toLowerCase()] || CAT_IMAGES['other'];
+
+      try {
+        const imgBuf = await getBuffer(catImgUrl);
+        await conn.sendMessage(from, {
+          image: imgBuf,
+          caption: listText,
+          mimetype: 'image/jpeg'
+        }, { quoted: mek });
+      } catch {
+        reply(listText);
       }
       return;
     }
 
-    // ── Legacy fallback: plain numbered-text replies (unchanged) ───
-    const input = raw;
-    if (input === '0') return;
-
-    if (state.stage === 'main') {
-      const num = parseInt(input);
-      if (isNaN(num) || num < 1 || num > state.keys.length) return;
-      const catName = state.keys[num - 1];
-      const cmds = state.cats[catName];
-      return openCategoryUI(conn, mek, sender, from, state, catName, cmds);
-    }
-
+    // ── Stage: category → select command ─────────────────────────
     if (state.stage === 'category') {
       const num = parseInt(input);
+      // ஓபனில் இருக்கும் கேட்டகரியின் கமாண்ட் எண்ணிக்கையை தாண்டி அழுத்தினால் block ஆகும்
       if (isNaN(num) || num < 1 || num > state.cmds.length) return;
-      const c = state.cmds[num - 1];
-      return openDetailUI(conn, mek, sender, from, state, c, state.catName);
+
+      const cmd  = state.cmds[num - 1];
+      menuState.set(sender, { ...state, stage: 'detail', cmd });
+
+      await conn.sendMessage(from, { react: { text: '📌', key: mek.key } });
+
+      const detailText = buildCmdDetail(cmd, state.prefix);
+      const detailImgUrl = CAT_IMAGES['detail'] || CAT_IMAGES['other'];
+
+      try {
+        const imgBuf = await getBuffer(detailImgUrl);
+        await conn.sendMessage(from, {
+          image: imgBuf,
+          caption: detailText,
+          mimetype: 'image/jpeg'
+        }, { quoted: mek });
+      } catch {
+        reply(detailText);
+      }
+      return;
     }
 
+    // ── Stage: detail → Show category list again with Image + Reply ──
     if (state.stage === 'detail') {
       const num = parseInt(input);
       if (isNaN(num)) return;
-      return backToCategoryUI(conn, mek, sender, from, state);
+      
+      const listText = buildCmdList(state.cmds, state.catName, state.prefix);
+      menuState.set(sender, { ...state, stage: 'category' });
+
+      const catImgUrl = CAT_IMAGES[state.catName.toLowerCase()] || CAT_IMAGES['other'];
+
+      try {
+        const imgBuf = await getBuffer(catImgUrl);
+        await conn.sendMessage(from, {
+          image: imgBuf,
+          caption: listText,
+          mimetype: 'image/jpeg'
+        }, { quoted: mek });
+      } catch {
+        reply(listText);
+      }
+      return;
     }
 
   } catch (e) {
@@ -475,3 +336,4 @@ cmd({
     }
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
+
