@@ -2,7 +2,7 @@ const { cmd } = require('../command');
 
 // NOTE: this requires your main server file to `module.exports = { Pair, ... }`.
 // If your main file isn't called index.js, change '../index' below to match it.
-const { Pair, PAIRING_CODE_TTL_MS } = require('../index');
+const { Pair, PAIRING_CODE_TTL_MS } = require('../pair');
 
 cmd({
     pattern: "pair",
