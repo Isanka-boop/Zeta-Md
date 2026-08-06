@@ -47,7 +47,7 @@ const CAT_REACTS = {
 };
 
 // ── Global Footer Content ────────────────────────────────────────
-const GLOBAL_FOOTER = `\n╭─────𓆩★𓆪──────╮\n> 🚀 𝙿σ𝚆є𝚁є𝙳 𝙱у ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲\n╰─────𓆩★𓆪──────╯`;
+const GLOBAL_FOOTER = `\n╭───────────╮\n> 𝙿σ𝚆є𝚁є𝙳 𝙱у ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲\n╰───────────╯`;
 
 // ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
 const menuState = new Map();
@@ -145,7 +145,7 @@ cmd({
     menuText += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['main']);
+      const imgBuf = await getBuffer(CAT_IMAGES['']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: menuText,
