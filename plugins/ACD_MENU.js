@@ -135,6 +135,7 @@ cmd({
 
     let menuText = ``;
     menuText += `👋 𝐇𝐄𝐘 ${pushname} 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐙𝐄𝐓𝐀 🫵\n`;
+    
     menuText += `╭━━━〔 𝐙𝐄𝐓𝐀 𝐌𝐄𝐍𝐔〕━✦\n`;
     menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
     menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
@@ -353,7 +354,7 @@ cmd({
     ];
 
     const sent = await sendAliveButtons(conn, from, mek, {
-      imageUrl: CAT_IMAGES['alive'],
+      imageUrl: CAT_IMAGES[''],
       caption: text,
       footer: GLOBAL_FOOTER,
       buttons
