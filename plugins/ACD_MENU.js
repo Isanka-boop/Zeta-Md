@@ -3,6 +3,11 @@ const { cmd, commands } = require('../command');
 const { getSetting, isUserLoaded, initEnvsettings } = require('../settings');
 const { getBuffer } = require('../lib/functions');
 const os = require('os');  // For RAM info
+const {
+  proto,
+  generateWAMessageFromContent,
+  prepareWAMessageMedia
+} = require('@whiskeysockets/baileys');
 
 // ══════════════════════════════════════════════════════════════════
 // CONFIG — Change these to your own
@@ -261,7 +266,60 @@ cmd({
 });
 
 // ══════════════════════════════════════════════════════════════════
+// sendAliveButtons — real native-flow quick_reply buttons via
+// relayMessage (same proven approach used across the bot, e.g.
+// pinterest.js / tiktok.js). The `id` of each quick_reply button is
+// the full command text (e.g. ".menu"), and pair.js already unpacks
+// interactiveResponseMessage → nativeFlowResponseMessage.paramsJson.id
+// as the message body, so tapping a button re-runs that command
+// exactly as if the user had typed it — no extra response handler
+// needed.
+// ══════════════════════════════════════════════════════════════════
+async function sendAliveButtons(conn, from, mek, { imageUrl, caption, footer, buttons }) {
+  try {
+    let header;
+    try {
+      const imgBuf = await getBuffer(imageUrl);
+      const media = await prepareWAMessageMedia(
+        { image: imgBuf },
+        { upload: conn.waUploadToServer }
+      );
+      header = proto.Message.InteractiveMessage.Header.fromObject({
+        hasMediaAttachment: true, ...media
+      });
+    } catch {
+      header = proto.Message.InteractiveMessage.Header.fromObject({
+        title: '', hasMediaAttachment: false
+      });
+    }
+
+    const interactiveMessage = proto.Message.InteractiveMessage.fromObject({
+      body: proto.Message.InteractiveMessage.Body.fromObject({ text: caption }),
+      footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: footer }),
+      header,
+      nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons })
+    });
+
+    const waMsg = generateWAMessageFromContent(from, {
+      viewOnceMessage: {
+        message: {
+          messageContextInfo: { deviceListMetadataVersion: 2, deviceListMetadata: {} },
+          interactiveMessage
+        }
+      }
+    }, { quoted: mek, userJid: conn.user.id });
+
+    await conn.relayMessage(from, waMsg.message, { messageId: waMsg.key.id });
+    return true;
+  } catch (e) {
+    console.error('[ALIVE BUTTON SEND ERROR]', e);
+    return false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
 // ALIVE COMMAND — Hacker Font Backticks + Image + Reply + Global Footer
+//                  + .menu / .ping quick-reply buttons
 // ══════════════════════════════════════════════════════════════════
 cmd({
   pattern: 'alive',
@@ -270,8 +328,9 @@ cmd({
   category: 'main',
   react: '🚀',
   filename: __filename
-}, async (conn, mek, m, { from, pushname, reply }) => {
+}, async (conn, mek, m, { from, pushname, reply, prefix }) => {
   try {
+    const px = prefix || '.';
     const uptime = process.uptime();
     const h = Math.floor(uptime / 3600);
     const min = Math.floor((uptime % 3600) / 60);
@@ -285,18 +344,33 @@ cmd({
     text += `│  ⏱️ \`Uptime\`   : ${h}h ${min}m ${sec}s\n`;
     text += `│  📊 \`Cmds\`     : ${totalCmds}\n`;
     text += `╰────────────╯\n\n`;
-    text += `_💡 Use \`.menu\` to open the interactive UI_\n`;
+    text += `_💡 Tap a button below, or use \`${px}menu\` to open the interactive UI_\n`;
     text += GLOBAL_FOOTER;
 
-    try {
-      const imgBuf = await getBuffer(CAT_IMAGES['']);
-      await conn.sendMessage(from, {
-        image: imgBuf,
-        caption: text,
-        mimetype: 'image/jpeg'
-      }, { quoted: mek });
-    } catch {
-      reply(text);
+    const buttons = [
+      { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '📋 Menu', id: `${px}menu` }) },
+      { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '🏓 Ping', id: `${px}ping` }) }
+    ];
+
+    const sent = await sendAliveButtons(conn, from, mek, {
+      imageUrl: CAT_IMAGES['alive'],
+      caption: text,
+      footer: GLOBAL_FOOTER,
+      buttons
+    });
+
+    if (!sent) {
+      // Fallback: plain image/text reply with a typed-command hint
+      try {
+        const imgBuf = await getBuffer(CAT_IMAGES['alive']);
+        await conn.sendMessage(from, {
+          image: imgBuf,
+          caption: text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`,
+          mimetype: 'image/jpeg'
+        }, { quoted: mek });
+      } catch {
+        reply(text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`);
+      }
     }
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
