@@ -37,15 +37,11 @@ async (robin, mek) => {
     const mentionedJid = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
     const text = mentionedJid.length? `@${mentionedJid[0].split("@")[0]} ${random}` : random;
 
-    // LIST MESSAGE - 100% වැඩ
+    // PHOTO නැතුව TEXT ONLY + BUTTONS
     const msg = {
-        image: { url: 'https://files.catbox.moe/chtymz.jpg' },
-        caption: text + "\n\n> ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
+        text: text + "\n\n> ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
         footer: "Baduwa Bot",
-        templateButtons: [
-            { index: 1, urlButton: { displayText: 'GitHub', url: 'https://github.com' } }, // උදාහරණයක්
-        ],
-        interactiveButtons: [ // අලුත්ම format
+        interactiveButtons: [
             { name: "quick_reply", buttonParamsJson: JSON.stringify({ display_text: "තව 😏", id: ".baduwa" }) },
             { name: "quick_reply", buttonParamsJson: JSON.stringify({ display_text: "Vcard 📇", id: "send_baduwa_vcard" }) },
             { name: "quick_reply", buttonParamsJson: JSON.stringify({ display_text: "Direct", id: ".baduvacard" }) }
@@ -53,12 +49,15 @@ async (robin, mek) => {
         mentions: mentionedJid
     };
 
-    await robin.sendMessage(from, { react: { text: "😏", key: mek.key } });
-    await robin.sendMessage(from, msg, { quoted: mek });
+    await Promise.all([
+        robin.sendMessage(from, { react: { text: "🖕", key: mek.key } }),
+        robin.sendMessage(from, msg, { quoted: mek })
+    ]);
 });
 
-// BUTTON / LIST REPLY HANDLER - 2 දෙකම අල්ලනවා
+// BUTTON REPLY HANDLER
 cmd({ on: "message" }, async (robin, mek) => {
+    if(!mek.message) return;
     const type = Object.keys(mek.message)[0];
     const from = mek.key.remoteJid;
 
@@ -68,7 +67,10 @@ cmd({ on: "message" }, async (robin, mek) => {
 
     if(id === 'send_baduwa_vcard'){
         await robin.sendMessage(from, {
-            contacts: { displayName: "Baduwa King 👑", contacts: [{ displayName: "Baduwa King 👑", vcard }] }
+            contacts: {
+                displayName: "Baduwa King 👑",
+                contacts: [{ displayName: "Baduwa King 👑", vcard }]
+            }
         }, { quoted: mek });
     }
 });
