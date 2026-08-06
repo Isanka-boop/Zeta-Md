@@ -1,3357 +1,392 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Pairing Hub - Ultra-premium pairing code generation platform">
-    <meta name="keywords" content="pairing code, WhatsApp, verification, code generator">
-    <meta name="author" content="Pairing Hub">
-    <meta name="theme-color" content="#0a0a1a">
-    <title>Zeta Md — Premium Code Generation</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
+    <title>ZETA MD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* ============================================
-           CSS CUSTOM PROPERTIES & RESET
-           ============================================ */
         :root {
-            --bg-primary: #06060f;
-            --bg-secondary: #0c0c1e;
-            --bg-card: rgba(15, 15, 35, 0.6);
-            --bg-glass: rgba(255, 255, 255, 0.03);
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(0, 200, 255, 0.3);
-            --text-primary: #f0f0ff;
-            --text-secondary: #8888aa;
-            --text-muted: #555577;
-            --neon-blue: #00c8ff;
-            --neon-cyan: #00ffd5;
-            --neon-purple: #a855f7;
-            --neon-emerald: #10b981;
-            --neon-pink: #ec4899;
-            --gradient-1: linear-gradient(135deg, #00c8ff, #a855f7);
-            --gradient-2: linear-gradient(135deg, #00ffd5, #00c8ff);
-            --gradient-3: linear-gradient(135deg, #a855f7, #ec4899);
-            --shadow-neon: 0 0 30px rgba(0, 200, 255, 0.15);
-            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --radius-sm: 8px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
-            --radius-xl: 32px;
-            --font-display: 'Poppins', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --transition-fast: 0.2s var(--ease-out-expo);
-            --transition-medium: 0.4s var(--ease-out-expo);
-            --transition-slow: 0.7s var(--ease-out-expo);
+            --bg: #050505;
+            --surface: #0d0d0d;
+            --border: #1a1a1a;
+            --neon: #00f2ff; /* Cyan Neon */
+            --neon-glow: rgba(0, 242, 255, 0.5);
+            --text: #ffffff;
+            --muted: #888888;
+            --error: #ff3e3e;
         }
 
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
+        body.light-mode {
+            --bg: #ffffff;
+            --surface: #f5f5f5;
+            --border: #dddddd;
+            --neon: #000000;
+            --neon-glow: rgba(0, 0, 0, 0.2);
+            --text: #000000;
+            --muted: #666666;
+        }
+
+        * {
+            margin: 0; padding: 0;
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-            scrollbar-width: thin;
-            scrollbar-color: var(--neon-blue) var(--bg-primary);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-primary); }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--neon-cyan), var(--neon-pink));
-        }
-
         body {
-            font-family: var(--font-body);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* ============================================
-           LOADING SCREEN
-           ============================================ */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-primary);
-            transition: opacity 0.6s ease, visibility 0.6s ease;
-        }
-
-        .loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .loader-ring {
-            width: 70px;
-            height: 70px;
-            position: relative;
-        }
-
-        .loader-ring::before,
-        .loader-ring::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 3px solid transparent;
-        }
-
-        .loader-ring::before {
-            border-top-color: var(--neon-blue);
-            border-right-color: var(--neon-cyan);
-            animation: loaderSpin 1.2s linear infinite;
-        }
-
-        .loader-ring::after {
-            border-bottom-color: var(--neon-purple);
-            border-left-color: var(--neon-pink);
-            animation: loaderSpin 1.2s linear infinite reverse;
-            inset: 8px;
-        }
-
-        @keyframes loaderSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loader-text {
-            margin-top: 24px;
-            font-family: var(--font-display);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .loader-bar {
-            width: 200px;
-            height: 2px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 2px;
-            margin-top: 16px;
-            overflow: hidden;
-        }
-
-        .loader-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--gradient-1);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        /* ============================================
-           AURORA BACKGROUND
-           ============================================ */
-        .aurora-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .aurora-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.3;
-            animation: auroraFloat 20s ease-in-out infinite;
-        }
-
-        .aurora-orb:nth-child(1) {
-            width: 600px; height: 600px;
-            background: radial-gradient(circle, var(--neon-blue), transparent 70%);
-            top: -10%; left: -10%;
-            animation-duration: 25s;
-        }
-
-        .aurora-orb:nth-child(2) {
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, var(--neon-purple), transparent 70%);
-            top: 30%; right: -10%;
-            animation-duration: 20s;
-            animation-delay: -5s;
-        }
-
-        .aurora-orb:nth-child(3) {
-            width: 450px; height: 450px;
-            background: radial-gradient(circle, var(--neon-emerald), transparent 70%);
-            bottom: -5%; left: 30%;
-            animation-duration: 22s;
-            animation-delay: -10s;
-        }
-
-        .aurora-orb:nth-child(4) {
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, var(--neon-pink), transparent 70%);
-            top: 60%; left: -5%;
-            animation-duration: 18s;
-            animation-delay: -7s;
-        }
-
-        @keyframes auroraFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(80px, -60px) scale(1.1); }
-            50% { transform: translate(-40px, 80px) scale(0.9); }
-            75% { transform: translate(60px, 40px) scale(1.05); }
-        }
-
-        /* Particles Canvas */
-        #particles-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        /* ============================================
-           NAVIGATION
-           ============================================ */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 16px 24px;
-            transition: all 0.4s var(--ease-out-expo);
-        }
-
-        .navbar.scrolled {
-            padding: 10px 24px;
-            background: rgba(6, 6, 15, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-glass);
-        }
-
-        .nav-inner {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-
-        .nav-logo-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
-            background: var(--gradient-1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-display);
-            font-weight: 800;
-            font-size: 18px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-logo-icon::after {
-            content: '';
-            position: absolute;
-            inset: 1px;
-            border-radius: calc(var(--radius-sm) - 1px);
-            background: rgba(6, 6, 15, 0.5);
-        }
-
-        .nav-logo-icon span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .nav-logo-text {
-            font-family: var(--font-display);
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-            transition: color var(--transition-fast);
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--gradient-1);
-            border-radius: 2px;
-            transition: width var(--transition-medium);
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-cta {
-            padding: 10px 24px;
-            background: var(--gradient-1);
-            border: none;
-            border-radius: var(--radius-sm);
-            color: #fff;
-            font-family: var(--font-body);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 200, 255, 0.3);
-        }
-
-        /* Mobile Menu Toggle */
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            cursor: pointer;
-            padding: 8px;
-        }
-
-        /* ============================================
-           MAIN CONTENT WRAPPER
-           ============================================ */
-        .main-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        /* ============================================
-           HERO / LANDING SECTION
-           ============================================ */
-        .hero {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 120px 24px 80px;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        
+        .bg-animate {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            overflow: hidden;
+        }
+        
+        .blob {
+            position: absolute;
+            width: 300px; height: 300px;
+            background: var(--neon);
+            filter: blur(80px);
+            border-radius: 50%;
+            opacity: 0.05;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(110%, 110%); }
+        }
+
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: fadeInScale 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .brand h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--neon);
+            text-shadow: 0 0 15px var(--neon-glow);
+            /* --- Animation 3: Text Flicker --- */
+            animation: flicker 3s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: 0 0 15px var(--neon-glow); }
+            20%, 24%, 55% { text-shadow: none; opacity: 0.8; }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: all 0.4s ease;
+        }
+
+        
+        .card:focus-within {
+            border-color: var(--neon);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
+        }
+
+        .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--neon);
+            margin-bottom: 20px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        input[type="tel"] {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            padding: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="tel"]:focus {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--neon);
+        }
+
+        
+        .btn {
+            width: 100%;
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
 
-        .hero-inner {
-            max-width: 900px;
-            text-align: center;
-            position: relative;
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px var(--neon-glow);
+            filter: brightness(1.1);
         }
 
-        /* Floating decorative elements */
-        .hero-float {
-            position: absolute;
+        .btn:active { transform: translateY(0); }
+
+        .loader {
+            width: 18px; height: 18px;
+            border: 3px solid #000;
+            border-top: 3px solid transparent;
             border-radius: 50%;
-            pointer-events: none;
+            animation: spin 0.8s linear infinite;
         }
 
-        .hero-float-1 {
-            width: 300px; height: 300px;
-            border: 1px solid rgba(0, 200, 255, 0.08);
-            top: -80px; right: -100px;
-            animation: heroFloat 8s ease-in-out infinite;
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .result {
+            margin-top: 25px;
+            display: none;
         }
 
-        .hero-float-2 {
-            width: 200px; height: 200px;
-            border: 1px solid rgba(168, 85, 247, 0.08);
-            bottom: -60px; left: -80px;
-            animation: heroFloat 10s ease-in-out infinite reverse;
+        .result.show { 
+            display: block; 
+            animation: slideIn 0.5s ease forwards;
         }
 
-        .hero-float-3 {
-            width: 12px; height: 12px;
-            background: var(--neon-blue);
-            opacity: 0.4;
-            top: 20%; left: 10%;
-            animation: heroFloat 6s ease-in-out infinite;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
-
-        .hero-float-4 {
-            width: 8px; height: 8px;
-            background: var(--neon-purple);
-            opacity: 0.4;
-            top: 30%; right: 8%;
-            animation: heroFloat 7s ease-in-out infinite reverse;
-            box-shadow: 0 0 15px var(--neon-purple);
-        }
-
-        .hero-float-5 {
-            width: 6px; height: 6px;
-            background: var(--neon-emerald);
-            opacity: 0.5;
-            bottom: 25%; left: 15%;
-            animation: heroFloat 5s ease-in-out infinite;
-            box-shadow: 0 0 12px var(--neon-emerald);
-        }
-
-        @keyframes heroFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        /* Animated Logo */
-        .hero-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 32px;
-            border-radius: var(--radius-lg);
-            background: var(--gradient-1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            animation: logoEntry 1s var(--ease-out-back) both;
-            box-shadow: 0 0 60px rgba(0, 200, 255, 0.2), 0 0 120px rgba(168, 85, 247, 0.1);
-        }
-
-        .hero-logo::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: calc(var(--radius-lg) + 2px);
-            background: var(--gradient-1);
-            z-index: -1;
-            animation: logoGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes logoGlow {
-            0%, 100% { opacity: 0.5; filter: blur(10px); }
-            50% { opacity: 0.8; filter: blur(20px); }
-        }
-
-        @keyframes logoEntry {
-            from { opacity: 0; transform: scale(0.5) rotateY(90deg); }
-            to { opacity: 1; transform: scale(1) rotateY(0); }
-        }
-
-        .hero-logo span {
-            font-family: var(--font-display);
-            font-weight: 900;
-            font-size: 32px;
-            color: #fff;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        /* Hero Badge */
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 20px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 100px;
-            font-size: 13px;
-            color: var(--neon-cyan);
-            font-weight: 500;
-            margin-bottom: 28px;
-            animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.2s both;
-            backdrop-filter: blur(10px);
-        }
-
-        .hero-badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--neon-emerald);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        /* Hero Title */
-        .hero-title {
-            font-family: var(--font-display);
-            font-size: clamp(36px, 7vw, 72px);
-            font-weight: 900;
-            line-height: 1.05;
-            margin-bottom: 24px;
-            animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.35s both;
-        }
-
-        .hero-title .gradient-text {
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            background-size: 200% 200%;
-            animation: gradientShift 4s ease-in-out infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .hero-subtitle {
-            font-size: clamp(16px, 2.5vw, 20px);
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-            line-height: 1.7;
-            animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.5s both;
-        }
-
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Hero CTA Button */
-        .hero-cta-wrap {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.65s both;
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 36px;
-            background: var(--gradient-1);
-            background-size: 200% 200%;
-            border: none;
-            border-radius: var(--radius-md);
-            color: #fff;
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-            text-decoration: none;
-            animation: gradientShift 4s ease-in-out infinite;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(0, 200, 255, 0.35);
-        }
-
-        .btn-primary:active {
-            transform: translateY(-1px) scale(0.98);
-        }
-
-        /* Ripple Effect */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: rippleEffect 0.6s ease-out forwards;
-            pointer-events: none;
-        }
-
-        @keyframes rippleEffect {
-            to { transform: scale(4); opacity: 0; }
-        }
-
-        .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 36px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            text-decoration: none;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--border-glow);
-            background: rgba(0, 200, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        /* Glass Info Cards */
-        .hero-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 64px;
-            animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.8s both;
-        }
-
-        .hero-card {
-            padding: 24px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            transition: all var(--transition-medium);
-            text-align: left;
-        }
-
-        .hero-card:hover {
-            border-color: var(--border-glow);
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-neon);
-        }
-
-        .hero-card-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 14px;
-        }
-
-        .hero-card-icon.blue { background: rgba(0, 200, 255, 0.1); color: var(--neon-blue); }
-        .hero-card-icon.purple { background: rgba(168, 85, 247, 0.1); color: var(--neon-purple); }
-        .hero-card-icon.emerald { background: rgba(16, 185, 129, 0.1); color: var(--neon-emerald); }
-
-        .hero-card h3 {
-            font-family: var(--font-display);
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .hero-card p {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        /* ============================================
-           SECTION COMMON STYLES
-           ============================================ */
-        .section {
-            padding: 100px 24px;
-            position: relative;
-        }
-
-        .section-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 64px;
-        }
-
-        .section-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            background: rgba(0, 200, 255, 0.06);
-            border: 1px solid rgba(0, 200, 255, 0.15);
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--neon-blue);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-family: var(--font-display);
-            font-size: clamp(28px, 5vw, 48px);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 16px;
-        }
-
-        .section-desc {
-            font-size: 17px;
-            color: var(--text-secondary);
-            max-width: 560px;
-            margin: 0 auto;
-        }
-
-        /* Scroll Reveal */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: all 0.8s var(--ease-out-expo);
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .reveal-delay-1 { transition-delay: 0.1s; }
-        .reveal-delay-2 { transition-delay: 0.2s; }
-        .reveal-delay-3 { transition-delay: 0.3s; }
-        .reveal-delay-4 { transition-delay: 0.4s; }
-
-        /* ============================================
-           PAIRING SECTION
-           ============================================ */
-        .pairing-section {
-            padding: 100px 24px 120px;
-        }
-
-        .pairing-container {
-            max-width: 520px;
-            margin: 0 auto;
-        }
-
-        .pairing-card {
-            padding: 40px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-xl);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-card);
-        }
-
-        /* Animated Glowing Border */
-        .pairing-card::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            border-radius: calc(var(--radius-xl) + 1px);
-            background: conic-gradient(
-                from 0deg,
-                transparent 0%,
-                var(--neon-blue) 10%,
-                transparent 20%,
-                transparent 50%,
-                var(--neon-purple) 60%,
-                transparent 70%
-            );
-            z-index: -1;
-            animation: borderRotate 6s linear infinite;
-            opacity: 0.4;
-        }
-
-        @keyframes borderRotate {
-            to { transform: rotate(360deg); }
-        }
-
-        .pairing-card-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .pairing-card-header .icon-wrap {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-md);
-            background: rgba(0, 200, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            color: var(--neon-blue);
-        }
-
-        .pairing-card-header h2 {
-            font-family: var(--font-display);
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .pairing-card-header p {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        /* Country Selector */
-        .country-select-wrap {
-            position: relative;
-        }
-
-        .country-select {
-            width: 100%;
-            padding: 14px 16px 14px 48px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            font-size: 15px;
-            appearance: none;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            outline: none;
-        }
-
-        .country-select:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1);
-        }
-
-        .country-select option {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .country-flag {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            pointer-events: none;
-        }
-
-        .country-select-arrow {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        /* Phone Input */
-        .phone-input-wrap {
-            display: flex;
-            gap: 10px;
-        }
-
-        .phone-prefix {
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            color: var(--text-secondary);
-            font-size: 15px;
-            font-weight: 500;
-            white-space: nowrap;
-            min-width: 70px;
-            justify-content: center;
-        }
-
-        .phone-input {
-            flex: 1;
-            padding: 14px 16px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            font-size: 15px;
-            outline: none;
-            transition: all var(--transition-fast);
-        }
-
-        .phone-input:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1);
-        }
-
-        .phone-input.error {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-        }
-
-        .phone-input.valid {
-            border-color: var(--neon-emerald);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        .phone-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        /* Validation Message */
-        .validation-msg {
-            font-size: 12px;
-            margin-top: 6px;
-            min-height: 18px;
-            transition: all var(--transition-fast);
-        }
-
-        .validation-msg.error { color: #ef4444; }
-        .validation-msg.success { color: var(--neon-emerald); }
-
-        /* Generate Button */
-        .btn-generate {
-            width: 100%;
-            padding: 16px;
-            background: var(--gradient-1);
-            background-size: 200% 200%;
-            border: none;
-            border-radius: var(--radius-md);
-            color: #fff;
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            position: relative;
-            overflow: hidden;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            animation: gradientShift 4s ease-in-out infinite;
-        }
-
-        .btn-generate:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 200, 255, 0.3);
-        }
-
-        .btn-generate:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ============================================
-           LOADING OVERLAY (in-card)
-           ============================================ */
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(6, 6, 15, 0.92);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-            border-radius: var(--radius-xl);
-        }
-
-        .loading-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .futuristic-spinner {
-            width: 60px;
-            height: 60px;
-            position: relative;
-            margin-bottom: 24px;
-        }
-
-        .futuristic-spinner .ring {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 2px solid transparent;
-        }
-
-        .futuristic-spinner .ring:nth-child(1) {
-            border-top-color: var(--neon-blue);
-            animation: spinRing 1s linear infinite;
-        }
-
-        .futuristic-spinner .ring:nth-child(2) {
-            inset: 6px;
-            border-right-color: var(--neon-purple);
-            animation: spinRing 1.5s linear infinite reverse;
-        }
-
-        .futuristic-spinner .ring:nth-child(3) {
-            inset: 12px;
-            border-bottom-color: var(--neon-cyan);
-            animation: spinRing 2s linear infinite;
-        }
-
-        .futuristic-spinner .center-dot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            margin: -4px 0 0 -4px;
-            border-radius: 50%;
-            background: var(--neon-blue);
-            box-shadow: 0 0 20px var(--neon-blue);
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes spinRing {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-progress {
-            width: 200px;
-            height: 3px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .loading-progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--gradient-1);
-            border-radius: 3px;
-            transition: width 0.15s linear;
-        }
-
-        .loading-text {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* ============================================
-           CODE DISPLAY
-           ============================================ */
         .code-display {
-            display: none;
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px dashed var(--neon);
+            border-radius: 8px;
+            padding: 25px;
             text-align: center;
         }
 
-        .code-display.active {
-            display: block;
-            animation: codeReveal 0.6s var(--ease-out-back) both;
-        }
-
-        @keyframes codeReveal {
-            from { opacity: 0; transform: scale(0.9) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .code-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            font-weight: 500;
-        }
-
-        .code-box {
-            position: relative;
-            padding: 28px 32px;
-            background: rgba(0, 200, 255, 0.03);
-            border: 1px solid rgba(0, 200, 255, 0.2);
-            border-radius: var(--radius-lg);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .code-box::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(0,200,255,0.05), transparent, rgba(168,85,247,0.05));
-            pointer-events: none;
-        }
-
-        .code-box-glow {
-            position: absolute;
-            inset: -1px;
-            border-radius: calc(var(--radius-lg) + 1px);
-            background: conic-gradient(
-                from 0deg,
-                transparent 0%,
-                var(--neon-blue) 8%,
-                transparent 16%,
-                transparent 50%,
-                var(--neon-purple) 58%,
-                transparent 66%
-            );
-            z-index: -1;
-            animation: borderRotate 4s linear infinite;
-            opacity: 0.5;
-        }
-
-        .code-value {
-            font-family: 'Courier New', monospace;
-            font-size: clamp(28px, 6vw, 42px);
+        .code-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.2rem;
             font-weight: 700;
-            letter-spacing: 8px;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            z-index: 1;
-            word-break: break-all;
+            letter-spacing: 10px;
+            color: var(--neon);
+            text-shadow: 0 0 10px var(--neon-glow);
         }
 
-        .code-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .btn-copy, .btn-regen {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: var(--radius-sm);
-            font-family: var(--font-body);
-            font-size: 14px;
-            font-weight: 600;
+        .copy-link {
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-top: 15px;
             cursor: pointer;
-            transition: all var(--transition-fast);
-            border: none;
+            transition: 0.3s;
         }
 
-        .btn-copy {
-            background: rgba(0, 200, 255, 0.1);
-            border: 1px solid rgba(0, 200, 255, 0.2);
-            color: var(--neon-blue);
-        }
+        .copy-link:hover { color: var(--neon); }
 
-        .btn-copy:hover {
-            background: rgba(0, 200, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .btn-copy.copied {
-            background: rgba(16, 185, 129, 0.15);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: var(--neon-emerald);
-        }
-
-        .btn-regen {
-            background: rgba(168, 85, 247, 0.1);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-            color: var(--neon-purple);
-        }
-
-        .btn-regen:hover:not(:disabled) {
-            background: rgba(168, 85, 247, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .btn-regen:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* Countdown */
-        .countdown-wrap {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .countdown-ring {
-            width: 36px;
-            height: 36px;
-            position: relative;
-        }
-
-        .countdown-ring svg {
-            transform: rotate(-90deg);
-            width: 36px;
-            height: 36px;
-        }
-
-        .countdown-ring circle {
-            fill: none;
-            stroke-width: 3;
-        }
-
-        .countdown-ring .bg { stroke: rgba(255,255,255,0.05); }
-        .countdown-ring .progress {
-            stroke: var(--neon-blue);
-            stroke-linecap: round;
-            transition: stroke-dashoffset 1s linear;
-        }
-
-        .countdown-num {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--neon-blue);
-        }
-
-        /* ============================================
-           FEATURES SECTION
-           ============================================ */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .feature-card {
-            padding: 32px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-lg);
-            backdrop-filter: blur(12px);
-            transition: all var(--transition-medium);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
-            opacity: 0;
-            transition: opacity var(--transition-medium);
-        }
-
-        .feature-card:hover {
-            border-color: rgba(0, 200, 255, 0.15);
-            transform: translateY(-6px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 200, 255, 0.05);
-        }
-
-        .feature-card:hover::before {
-            opacity: 1;
-        }
-
-        .feature-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .feature-icon.i-blue { background: rgba(0,200,255,0.08); color: var(--neon-blue); }
-        .feature-icon.i-purple { background: rgba(168,85,247,0.08); color: var(--neon-purple); }
-        .feature-icon.i-emerald { background: rgba(16,185,129,0.08); color: var(--neon-emerald); }
-        .feature-icon.i-pink { background: rgba(236,72,153,0.08); color: var(--neon-pink); }
-        .feature-icon.i-cyan { background: rgba(0,255,213,0.08); color: var(--neon-cyan); }
-        .feature-icon.i-gold { background: rgba(245,158,11,0.08); color: #f59e0b; }
-
-        .feature-card h3 {
-            font-family: var(--font-display);
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-
-        /* ============================================
-           STATISTICS SECTION
-           ============================================ */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 36px 20px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-lg);
-            backdrop-filter: blur(12px);
-            transition: all var(--transition-medium);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(0, 200, 255, 0.15);
-        }
-
-        .stat-number {
-            font-family: var(--font-display);
-            font-size: clamp(32px, 5vw, 48px);
-            font-weight: 900;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* ============================================
-           TESTIMONIALS SECTION
-           ============================================ */
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-        }
-
-        .testimonial-card {
-            padding: 32px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-lg);
-            backdrop-filter: blur(12px);
-            transition: all var(--transition-medium);
-        }
-
-        .testimonial-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(0, 200, 255, 0.12);
-        }
-
-        .testimonial-stars {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 16px;
-            color: #f59e0b;
-        }
-
-        .testimonial-text {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .testimonial-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border-glass);
-        }
-
-        .testimonial-name {
-            font-family: var(--font-display);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .testimonial-role {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* ============================================
-           FAQ SECTION
-           ============================================ */
-        .faq-list {
-            max-width: 720px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .faq-item {
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            transition: all var(--transition-medium);
-        }
-
-        .faq-item:hover {
-            border-color: rgba(0, 200, 255, 0.12);
-        }
-
-        .faq-item.open {
-            border-color: rgba(0, 200, 255, 0.2);
-        }
-
-        .faq-question {
-            width: 100%;
-            padding: 20px 24px;
-            background: none;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            color: var(--text-primary);
-            font-family: var(--font-display);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: left;
-            transition: color var(--transition-fast);
-        }
-
-        .faq-question:hover {
-            color: var(--neon-blue);
-        }
-
-        .faq-icon {
-            flex-shrink: 0;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: rgba(0, 200, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon-blue);
-            transition: transform var(--transition-medium);
-        }
-
-        .faq-item.open .faq-icon {
-            transform: rotate(45deg);
-        }
-
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s var(--ease-out-expo), padding 0.5s var(--ease-out-expo);
-        }
-
-        .faq-item.open .faq-answer {
-            max-height: 300px;
-        }
-
-        .faq-answer-inner {
-            padding: 0 24px 20px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-
-        /* ============================================
-           CONTACT SECTION
-           ============================================ */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: start;
-        }
-
-        .contact-info-card {
-            padding: 28px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            transition: all var(--transition-medium);
-        }
-
-        .contact-info-card:hover {
-            border-color: rgba(0, 200, 255, 0.15);
-            transform: translateX(4px);
-        }
-
-        .contact-info-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-sm);
-            background: rgba(0, 200, 255, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon-blue);
-            flex-shrink: 0;
-        }
-
-        .contact-info-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .contact-info-value {
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        .contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .contact-input, .contact-textarea {
-            width: 100%;
-            padding: 14px 16px;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            font-size: 15px;
-            outline: none;
-            transition: all var(--transition-fast);
-        }
-
-        .contact-input:focus, .contact-textarea:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1);
-        }
-
-        .contact-input::placeholder, .contact-textarea::placeholder {
-            color: var(--text-muted);
-        }
-
-        .contact-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* ============================================
-           FOOTER
-           ============================================ */
         .footer {
-            padding: 60px 24px 30px;
-            border-top: 1px solid var(--border-glass);
-            position: relative;
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: var(--muted);
+            opacity: 0.6;
         }
 
-        .footer-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 48px;
-        }
-
-        .footer-brand p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            margin-top: 12px;
-            max-width: 300px;
-        }
-
-        .footer-socials {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .footer-social-link {
-            width: 38px;
-            height: 38px;
-            border-radius: var(--radius-sm);
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all var(--transition-fast);
-        }
-
-        .footer-social-link:hover {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-            transform: translateY(-2px);
-        }
-
-        .footer-col h4 {
-            font-family: var(--font-display);
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-        }
-
-        .footer-col a {
-            display: block;
-            font-size: 14px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            padding: 5px 0;
-            transition: color var(--transition-fast);
-        }
-
-        .footer-col a:hover {
-            color: var(--neon-blue);
-        }
-
-        .footer-bottom {
-            padding-top: 24px;
-            border-top: 1px solid var(--border-glass);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .footer-bottom p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* ============================================
-           NOTIFICATION TOAST
-           ============================================ */
-        .toast-container {
+       
+        .floating-controls {
             position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 9000;
+            top: 25px;
+            right: 25px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            gap: 15px;
+            z-index: 100;
         }
 
-        .toast {
-            padding: 14px 20px;
-            background: rgba(15, 15, 35, 0.95);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 300px;
-            max-width: 420px;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-            animation: toastIn 0.4s var(--ease-out-back) both;
-        }
-
-        .toast.removing {
-            animation: toastOut 0.3s ease forwards;
-        }
-
-        .toast.success { border-left: 3px solid var(--neon-emerald); }
-        .toast.error { border-left: 3px solid #ef4444; }
-        .toast.info { border-left: 3px solid var(--neon-blue); }
-
-        .toast-icon { flex-shrink: 0; }
-        .toast.success .toast-icon { color: var(--neon-emerald); }
-        .toast.error .toast-icon { color: #ef4444; }
-        .toast.info .toast-icon { color: var(--neon-blue); }
-
-        .toast-text {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(60px) scale(0.9); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
-        }
-
-        @keyframes toastOut {
-            to { opacity: 0; transform: translateX(60px) scale(0.9); }
-        }
-
-        /* ============================================
-           BACK TO TOP BUTTON
-           ============================================ */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-sm);
-            background: var(--gradient-1);
-            border: none;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .f-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.7rem;
             cursor: pointer;
-            z-index: 900;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            transition: all var(--transition-medium);
-            box-shadow: 0 8px 30px rgba(0, 200, 255, 0.25);
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
         }
 
-        .back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+        .f-btn:hover { border-color: var(--neon); color: var(--neon); }
 
-        .back-to-top:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 200, 255, 0.35);
-        }
-
-        /* ============================================
-           MODAL
-           ============================================ */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 8000;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            width: 100%;
-            max-width: 440px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-xl);
-            padding: 36px;
-            transform: scale(0.9) translateY(20px);
-            transition: transform 0.4s var(--ease-out-back);
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1) translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            transition: color var(--transition-fast);
-        }
-
-        .modal-close:hover { color: var(--text-primary); }
-
-        .modal h3 {
-            font-family: var(--font-display);
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .modal p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-
-        /* ============================================
-           CARD TILT EFFECT
-           ============================================ */
-        .tilt-card {
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .nav-toggle { display: block; }
-
-            .nav-links.mobile-open {
-                display: flex;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: rgba(6, 6, 15, 0.95);
-                backdrop-filter: blur(20px);
-                padding: 24px;
-                gap: 16px;
-                border-bottom: 1px solid var(--border-glass);
-                animation: fadeSlideUp 0.3s ease both;
-            }
-
-            .hero-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-
-            .contact-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .pairing-card {
-                padding: 28px 20px;
-            }
-
-            .phone-input-wrap {
-                flex-direction: column;
-            }
-
-            .phone-prefix {
-                justify-content: flex-start;
-                padding: 14px 16px;
-            }
-
-            .testimonials-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .code-actions {
-                flex-direction: column;
-            }
-            .hero-cta-wrap {
-                flex-direction: column;
-            }
-            .btn-primary, .btn-secondary {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Reduced motion */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================
-         LOADING SCREEN
-         ========================================== -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loader-ring"></div>
-        <div class="loader-text">𝐙𝐄𝐓𝐀 𝐌𝐃</div>
-        <div class="loader-bar">
-            <div class="loader-bar-fill" id="loaderBarFill"></div>
+<div class="bg-animate">
+    <div class="blob"></div>
+</div>
+
+<div class="floating-controls">
+    <button class="f-btn" onclick="toggleMusic()" id="mBtn">𝐌𝐔𝐒𝐈𝐂: 𝐎𝐅𝐅 🎵</button>
+    <button class="f-btn" onclick="toggleTheme()">𝐌𝐎𝐃𝐄 🌓</button>
+</div>
+
+<audio id="bgMusic" loop>
+    <source src="https://files.catbox.moe/srf3p5.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container">
+    <div class="brand">
+        <h1>𝐙𝐄𝐓𝐀 𝐌𝐃</h1>
+        <div style="font-size: 0.6rem; color: var(--muted); margin-top: 10px; letter-spacing: 3px;">
+            <span style="color: var(--neon);">●</span> 𝐒𝐘𝐒𝐓𝐄𝐌 𝐒𝐄𝐂𝐔𝐑𝐄 ⚡
         </div>
     </div>
 
-    <!-- ==========================================
-         AURORA BACKGROUND
-         ========================================== -->
-    <div class="aurora-bg" aria-hidden="true">
-        <div class="aurora-orb"></div>
-        <div class="aurora-orb"></div>
-        <div class="aurora-orb"></div>
-        <div class="aurora-orb"></div>
-    </div>
-    <canvas id="particles-canvas" aria-hidden="true"></canvas>
-
-    <!-- ==========================================
-         TOAST CONTAINER
-         ========================================== -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- ==========================================
-         NAVIGATION
-         ========================================== -->
-    <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
-        <div class="nav-inner">
-            <a href="#" class="nav-logo" aria-label="Pairing Hub Home">
-                <div class="nav-logo-icon"><span>🥷</span></div>
-                <span class="nav-logo-text">𝐙𝐄𝐓𝐀 𝐌𝐃</span>
-            </a>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#stats">Statistics</a></li>
-                <li><a href="#testimonials">Reviews</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div style="display:flex;align-items:center;gap:12px;">
-                <a href="#pairing" class="nav-cta">Get Code</a>
-                <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-                    <i data-lucide="menu" style="width:24px;height:24px;"></i>
-                </button>
-            </div>
+    <div class="card">
+        <label class="label">01. 𝐄𝐍𝐓𝐄𝐑 𝐏𝐇𝐎𝐍𝐄 𝐍𝐔𝐌𝐁𝐄𝐑</label>
+        <div class="input-wrapper">
+            <input type="tel" id="phoneInput" placeholder="947XXXXXXXX" maxlength="15">
         </div>
-    </nav>
 
-    <!-- ==========================================
-         MAIN CONTENT
-         ========================================== -->
-    <main class="main-content">
+        <button class="btn" id="pairBtn" onclick="getPairingCode()">
+            <span id="btnText">𝐆𝐄𝐓 𝐏𝐀𝐈𝐑𝐈𝐍𝐆 𝐂𝐎𝐃𝐄</span>
+        </button>
 
-        <!-- HERO SECTION -->
-        <section class="hero" id="hero">
-            <div class="hero-inner">
-                <!-- Floating decorative elements -->
-                <div class="hero-float hero-float-1" aria-hidden="true"></div>
-                <div class="hero-float hero-float-2" aria-hidden="true"></div>
-                <div class="hero-float hero-float-3" aria-hidden="true"></div>
-                <div class="hero-float hero-float-4" aria-hidden="true"></div>
-                <div class="hero-float hero-float-5" aria-hidden="true"></div>
-
-                <!-- Animated Logo -->
-                <div class="hero-logo" aria-hidden="true"><span>P</span></div>
-
-                <!-- Badge -->
-                <div class="hero-badge">
-                    <span class="hero-badge-dot"></span>
-                    Secure & Instant Code Generation
-                </div>
-
-                <!-- Title -->
-                <h1 class="hero-title">
-                    Generate Your<br>
-                    <span class="gradient-text">Pairing Code</span><br>
-                    In Seconds
-                </h1>
-
-                <!-- Subtitle -->
-                <p class="hero-subtitle">
-                    The most reliable platform for generating secure pairing codes.
-                    Fast, elegant, and built with enterprise-grade security.
-                </p>
-
-                <!-- CTA Buttons -->
-                <div class="hero-cta-wrap">
-                    <a href="#pairing" class="btn-primary" id="heroCtaBtn">
-                        <i data-lucide="zap" style="width:18px;height:18px;"></i>
-                        Generate Code Now
-                    </a>
-                    <a href="#features" class="btn-secondary">
-                        <i data-lucide="play-circle" style="width:18px;height:18px;"></i>
-                        Learn More
-                    </a>
-                </div>
-
-                <!-- Glass Info Cards -->
-                <div class="hero-cards">
-                    <div class="hero-card tilt-card">
-                        <div class="hero-card-icon blue">
-                            <i data-lucide="shield-check" style="width:22px;height:22px;"></i>
-                        </div>
-                        <h3>Bank-Grade Security</h3>
-                        <p>End-to-end encrypted code generation with zero data retention.</p>
-                    </div>
-                    <div class="hero-card tilt-card">
-                        <div class="hero-card-icon purple">
-                            <i data-lucide="timer" style="width:22px;height:22px;"></i>
-                        </div>
-                        <h3>Instant Delivery</h3>
-                        <p>Codes generated and displayed in under 2 seconds on average.</p>
-                    </div>
-                    <div class="hero-card tilt-card">
-                        <div class="hero-card-icon emerald">
-                            <i data-lucide="globe" style="width:22px;height:22px;"></i>
-                        </div>
-                        <h3>Global Coverage</h3>
-                        <p>Supporting 190+ countries with localized phone validation.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAIRING SECTION -->
-        <section class="section pairing-section" id="pairing">
-            <div class="section-inner">
-                <div class="section-header reveal">
-                    <span class="section-label">
-                        <i data-lucide="key" style="width:14px;height:14px;"></i>
-                        Code Generator
-                    </span>
-                    <h2 class="section-title">Get Your Pairing Code</h2>
-                    <p class="section-desc">Enter your phone number below to generate a secure pairing code instantly.</p>
-                </div>
-
-                <div class="pairing-container reveal reveal-delay-1">
-                    <div class="pairing-card" id="pairingCard">
-                        <!-- Loading Overlay -->
-                        <div class="loading-overlay" id="loadingOverlay">
-                            <div class="futuristic-spinner">
-                                <div class="ring"></div>
-                                <div class="ring"></div>
-                                <div class="ring"></div>
-                                <div class="center-dot"></div>
-                            </div>
-                            <div class="loading-progress">
-                                <div class="loading-progress-bar" id="loadingProgressBar"></div>
-                            </div>
-                            <div class="loading-text" id="loadingText">Initializing secure channel...</div>
-                        </div>
-
-                        <!-- Form -->
-                        <div id="pairingForm">
-                            <div class="pairing-card-header">
-                                <div class="icon-wrap">
-                                    <i data-lucide="smartphone" style="width:26px;height:26px;"></i>
-                                </div>
-                                <h2>Enter Your Number</h2>
-                                <p>Select your country and enter your phone number</p>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="countrySelect">Country</label>
-                                <div class="country-select-wrap">
-                                    <span class="country-flag" id="countryFlag">🇺🇸</span>
-                                    <select class="country-select" id="countrySelect" aria-label="Select country">
-                                        <option value="+1|🇺🇸" data-flag="🇺🇸">United States (+1)</option>
-                                        <option value="+44|🇬🇧" data-flag="🇬🇧">United Kingdom (+44)</option>
-                                        <option value="+91|🇮🇳" data-flag="🇮🇳">India (+91)</option>
-                                        <option value="+94|🇱🇰" data-flag="🇱🇰">Sri Lanka (+94)</option>
-                                        <option value="+86|🇨🇳" data-flag="🇨🇳">China (+86)</option>
-                                        <option value="+81|🇯🇵" data-flag="🇯🇵">Japan (+81)</option>
-                                        <option value="+49|🇩🇪" data-flag="🇩🇪">Germany (+49)</option>
-                                        <option value="+33|🇫🇷" data-flag="🇫🇷">France (+33)</option>
-                                        <option value="+55|🇧🇷" data-flag="🇧🇷">Brazil (+55)</option>
-                                        <option value="+61|🇦🇺" data-flag="🇦🇺">Australia (+61)</option>
-                                        <option value="+82|🇰🇷" data-flag="🇰🇷">South Korea (+82)</option>
-                                        <option value="+39|🇮🇹" data-flag="🇮🇹">Italy (+39)</option>
-                                        <option value="+34|🇪🇸" data-flag="🇪🇸">Spain (+34)</option>
-                                        <option value="+7|🇷🇺" data-flag="🇷🇺">Russia (+7)</option>
-                                        <option value="+966|🇸🇦" data-flag="🇸🇦">Saudi Arabia (+966)</option>
-                                        <option value="+27|🇿🇦" data-flag="🇿🇦">South Africa (+27)</option>
-                                        <option value="+20|🇪🇬" data-flag="🇪🇬">Egypt (+20)</option>
-                                        <option value="+234|🇳🇬" data-flag="🇳🇬">Nigeria (+234)</option>
-                                        <option value="+52|🇲🇽" data-flag="🇲🇽">Mexico (+52)</option>
-                                        <option value="+62|🇮🇩" data-flag="🇮🇩">Indonesia (+62)</option>
-                                    </select>
-                                    <span class="country-select-arrow">
-                                        <i data-lucide="chevron-down" style="width:16px;height:16px;"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="phoneInput">Phone Number</label>
-                                <div class="phone-input-wrap">
-                                    <div class="phone-prefix" id="phonePrefix">+1</div>
-                                    <input
-                                        type="tel"
-                                        class="phone-input"
-                                        id="phoneInput"
-                                        placeholder="Enter your phone number"
-                                        autocomplete="tel"
-                                        aria-label="Phone number"
-                                        maxlength="15"
-                                    >
-                                </div>
-                                <div class="validation-msg" id="validationMsg"></div>
-                            </div>
-
-                            <button class="btn-generate" id="generateBtn" disabled>
-                                <i data-lucide="sparkles" style="width:18px;height:18px;"></i>
-                                Generate Pairing Code
-                            </button>
-                        </div>
-
-                        <!-- Code Display -->
-                        <div class="code-display" id="codeDisplay">
-                            <div class="pairing-card-header">
-                                <div class="icon-wrap" style="background:rgba(16,185,129,0.1);color:var(--neon-emerald);">
-                                    <i data-lucide="check-circle-2" style="width:26px;height:26px;"></i>
-                                </div>
-                                <h2>Code Generated Successfully</h2>
-                                <p>Copy the code below and use it within the time limit</p>
-                            </div>
-
-                            <div class="code-label">Your Pairing Code</div>
-                            <div class="code-box">
-                                <div class="code-box-glow"></div>
-                                <div class="code-value" id="codeValue">--------</div>
-                            </div>
-
-                            <div class="code-actions">
-                                <button class="btn-copy" id="copyBtn" aria-label="Copy code">
-                                    <i data-lucide="copy" style="width:16px;height:16px;"></i>
-                                    <span>Copy Code</span>
-                                </button>
-                                <button class="btn-regen" id="regenBtn" disabled aria-label="Regenerate code">
-                                    <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i>
-                                    <span>Regenerate</span>
-                                </button>
-                            </div>
-
-                            <div class="countdown-wrap" id="countdownWrap">
-                                <div class="countdown-ring">
-                                    <svg viewBox="0 0 36 36">
-                                        <circle class="bg" cx="18" cy="18" r="15.5"></circle>
-                                        <circle class="progress" id="countdownCircle" cx="18" cy="18" r="15.5"
-                                            stroke-dasharray="97.4" stroke-dashoffset="0"></circle>
-                                    </svg>
-                                    <div class="countdown-num" id="countdownNum">60</div>
-                                </div>
-                                <span>Code expires in <strong id="countdownText">60 seconds</strong></span>
-                            </div>
-
-                            <button class="btn-secondary" id="backToFormBtn" style="width:100%;margin-top:20px;justify-content:center;">
-                                <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-                                Enter Different Number
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FEATURES SECTION -->
-        <section class="section" id="features">
-            <div class="section-inner">
-                <div class="section-header reveal">
-                    <span class="section-label">
-                        <i data-lucide="layers" style="width:14px;height:14px;"></i>
-                        Features
-                    </span>
-                    <h2 class="section-title">Why Choose Pairing Hub</h2>
-                    <p class="section-desc">Built with cutting-edge technology for the most reliable code generation experience.</p>
-                </div>
-
-                <div class="features-grid">
-                    <div class="feature-card tilt-card reveal reveal-delay-1">
-                        <div class="feature-icon i-blue">
-                            <i data-lucide="lock" style="width:24px;height:24px;"></i>
-                        </div>
-                        <h3>End-to-End Encryption</h3>
-                        <p>Every code is generated using military-grade cryptographic algorithms ensuring maximum security.</p>
-                    </div>
-                    <div class="feature-card tilt-card reveal reveal-delay-2">
-                        <div class="feature-icon i-purple">
-                            <i data-lucide="bolt" style="width:24px;height:24px;"></i>
-                        </div>
-                        <h3>Lightning Fast</h3>
-                        <p>Codes are generated in under 2 seconds with our optimized client-side generation engine.</p>
-                    </div>
-                    <div class="feature-card tilt-card reveal reveal-delay-3">
-                        <div class="feature-icon i-emerald">
-                            <i data-lucide="shield" style="width:24px;height:24px;"></i>
-                        </div>
-                        <h3>Zero Data Retention</h3>
-                        <p>We never store your phone number or generated codes. Everything stays in your browser.</p>
-                    </div>
-                    <div class="feature-card tilt-card reveal reveal-delay-1">
-                        <div class="feature-icon i-pink">
-                            <i data-lucide="smartphone" style="width:24px;height:24px;"></i>
-                        </div>
-                        <h3>Mobile Optimized</h3>
-                        <p>Perfectly designed for every screen size. Generate codes on any device seamlessly.</p>
-                    </div>
-                    <div class="feature-card tilt-card reveal reveal-delay-2">
-                        <div class="feature-icon i-cyan">
-                            <i data-lucide="globe-2" style="width:24px;height:24px;"></i>
-                        </div>
-                        <h3>190+ Countries</h3>
-                        <p>Comprehensive country support with automatic phone number format validation.</p>
-                    </div>
-                    <div class="feature-card tilt-card reveal reveal-delay-3">
-                        <div class="feature-icon i-gold">
-                            <i data-lucide="clock" style="width:24px;height:24px;"></i>
-                        </div>
-                        <h3>Auto-Expiry</h3>
-                        <p>Each code comes with a 60-second countdown timer for enhanced security protocols.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- STATISTICS SECTION -->
-        <section class="section" id="stats">
-            <div class="section-inner">
-                <div class="section-header reveal">
-                    <span class="section-label">
-                        <i data-lucide="bar-chart-3" style="width:14px;height:14px;"></i>
-                        Statistics
-                    </span>
-                    <h2 class="section-title">Trusted Worldwide</h2>
-                    <p class="section-desc">Numbers that speak for themselves.</p>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card reveal reveal-delay-1">
-                        <div class="stat-number" data-target="2847593">0</div>
-                        <div class="stat-label">Codes Generated</div>
-                    </div>
-                    <div class="stat-card reveal reveal-delay-2">
-                        <div class="stat-number" data-target="192">0</div>
-                        <div class="stat-label">Countries Supported</div>
-                    </div>
-                    <div class="stat-card reveal reveal-delay-3">
-                        <div class="stat-number" data-target="99">0</div>
-                        <div class="stat-label">Uptime Percentage</div>
-                    </div>
-                    <div class="stat-card reveal reveal-delay-4">
-                        <div class="stat-number" data-target="15000">0</div>
-                        <div class="stat-label">Daily Active Users</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TESTIMONIALS SECTION -->
-        <section class="section" id="testimonials">
-            <div class="section-inner">
-                <div class="section-header reveal">
-                    <span class="section-label">
-                        <i data-lucide="message-circle" style="width:14px;height:14px;"></i>
-                        Testimonials
-                    </span>
-                    <h2 class="section-title">Loved by Users</h2>
-                    <p class="section-desc">Hear what our community has to say.</p>
-                </div>
-
-                <div class="testimonials-grid">
-                    <div class="testimonial-card reveal reveal-delay-1">
-                        <div class="testimonial-stars">
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                        </div>
-                        <p class="testimonial-text">"The fastest and most reliable pairing code generator I've ever used. The UI is absolutely stunning and it just works flawlessly every time."</p>
-                        <div class="testimonial-author">
-                            <img src="https://picsum.photos/seed/user1/88/88.jpg" alt="Sarah Chen" class="testimonial-avatar" loading="lazy">
-                            <div>
-                                <div class="testimonial-name">Sarah Chen</div>
-                                <div class="testimonial-role">Product Manager at TechFlow</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card reveal reveal-delay-2">
-                        <div class="testimonial-stars">
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                        </div>
-                        <p class="testimonial-text">"I was blown away by the design quality. This feels like a premium SaaS product, not a free tool. The code generation is instant and the countdown feature is brilliant."</p>
-                        <div class="testimonial-author">
-                            <img src="https://picsum.photos/seed/user2/88/88.jpg" alt="Marcus Rodriguez" class="testimonial-avatar" loading="lazy">
-                            <div>
-                                <div class="testimonial-name">Marcus Rodriguez</div>
-                                <div class="testimonial-role">Software Engineer at DevCore</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card reveal reveal-delay-3">
-                        <div class="testimonial-stars">
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                            <i data-lucide="star" style="width:16px;height:16px;fill:currentColor;"></i>
-                        </div>
-                        <p class="testimonial-text">"Finally a pairing code tool that doesn't look like it was built in 2010. The glassmorphism design, the animations, everything is top-notch. Highly recommended."</p>
-                        <div class="testimonial-author">
-                            <img src="https://picsum.photos/seed/user3/88/88.jpg" alt="Aiko Tanaka" class="testimonial-avatar" loading="lazy">
-                            <div>
-                                <div class="testimonial-name">Aiko Tanaka</div>
-                                <div class="testimonial-role">UX Designer at PixelLab</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ SECTION -->
-        <section class="section" id="faq">
-            <div class="section-inner">
-                <div class="section-header reveal">
-                    <span class="section-label">
-                        <i data-lucide="help-circle" style="width:14px;height:14px;"></i>
-                        FAQ
-                    </span>
-                    <h2 class="section-title">Frequently Asked Questions</h2>
-                    <p class="section-desc">Everything you need to know about Pairing Hub.</p>
-                </div>
-
-                <div class="faq-list">
-                    <div class="faq-item reveal reveal-delay-1">
-                        <button class="faq-question" aria-expanded="false">
-                            What is a pairing code?
-                            <span class="faq-icon"><i data-lucide="plus" style="width:14px;height:14px;"></i></span>
-                        </button>
-                        <div class="faq-answer">
-                            <div class="faq-answer-inner">A pairing code is a unique alphanumeric sequence used to link and authenticate devices or accounts. It provides a secure, time-limited method for establishing connections without exposing sensitive credentials.</div>
-                        </div>
-                    </div>
-                    <div class="faq-item reveal reveal-delay-2">
-                        <button class="faq-question" aria-expanded="false">
-                            Is my phone number stored anywhere?
-                            <span class="faq-icon"><i data-lucide="plus" style="width:14px;height:14px;"></i></span>
-                        </button>
-                        <div class="faq-answer">
-                            <div class="faq-answer-inner">Absolutely not. All processing happens entirely in your browser. We never transmit, store, or have access to your phone number. Once you close the tab, everything is gone.</div>
-                        </div>
-                    </div>
-                    <div class="faq-item reveal reveal-delay-3">
-                        <button class="faq-question" aria-expanded="false">
-                            Why does the code expire after 60 seconds?
-                            <span class="faq-icon"><i data-lucide="plus" style="width:14px;height:14px;"></i></span>
-                        </button>
-                        <div class="faq-answer">
-                            <div class="faq-answer-inner">The 60-second expiry is a security measure that limits the window of opportunity for unauthorized use. This follows industry best practices for one-time verification codes.</div>
-                        </div>
-                    </div>
-                    <div class="faq-item reveal reveal-delay-4">
-                        <button class="faq-question" aria-expanded="false">
-                            Can I generate multiple codes?
-                            <span class="faq-icon"><i data-lucide="plus" style="width:14px;height:14px;"></i></span>
-                        </button>
-                        <div class="faq-answer">
-                            <div class="faq-answer-inner">Yes, after the countdown expires, you can click the Regenerate button to create a new code. You can also go back and enter a different phone number to generate codes for multiple numbers.</div>
-                        </div>
-                    </div>
-                    <div class="faq-item reveal">
-                        <button class="faq-question" aria-expanded="false">
-                            Is this service free to use?
-                            <span class="faq-icon"><i data-lucide="plus" style="width:14px;height:14px;"></i></span>
-                        </button>
-                        <div class="faq-answer">
-                            <div class="faq-answer-inner">Yes, Pairing Hub is completely free with no limits. We believe secure code generation should be accessible to everyone without paywalls or usage restrictions.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CONTACT SECTION -->
-        <section class="section" id="contact">
-            <div class="section-inner">
-                <div class="section-header reveal">
-                    <span class="section-label">
-                        <i data-lucide="mail" style="width:14px;height:14px;"></i>
-                        Contact
-                    </span>
-                    <h2 class="section-title">Get in Touch</h2>
-                    <p class="section-desc">Have questions? We'd love to hear from you.</p>
-                </div>
-
-                <div class="contact-grid">
-                    <div class="reveal reveal-delay-1" style="display:flex;flex-direction:column;gap:16px;">
-                        <div class="contact-info-card">
-                            <div class="contact-info-icon">
-                                <i data-lucide="mail" style="width:20px;height:20px;"></i>
-                            </div>
-                            <div>
-                                <div class="contact-info-label">Email</div>
-                                <div class="contact-info-value">support@pairinghub.io</div>
-                            </div>
-                        </div>
-                        <div class="contact-info-card">
-                            <div class="contact-info-icon">
-                                <i data-lucide="map-pin" style="width:20px;height:20px;"></i>
-                            </div>
-                            <div>
-                                <div class="contact-info-label">Location</div>
-                                <div class="contact-info-value">San Francisco, CA 94105</div>
-                            </div>
-                        </div>
-                        <div class="contact-info-card">
-                            <div class="contact-info-icon">
-                                <i data-lucide="clock" style="width:20px;height:20px;"></i>
-                            </div>
-                            <div>
-                                <div class="contact-info-label">Response Time</div>
-                                <div class="contact-info-value">Within 24 hours</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form class="contact-form reveal reveal-delay-2" id="contactForm">
-                        <input type="text" class="contact-input" placeholder="Your Name" required aria-label="Your name">
-                        <input type="email" class="contact-input" placeholder="Your Email" required aria-label="Your email">
-                        <input type="text" class="contact-input" placeholder="Subject" required aria-label="Subject">
-                        <textarea class="contact-textarea" placeholder="Your Message" required aria-label="Your message"></textarea>
-                        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">
-                            <i data-lucide="send" style="width:18px;height:18px;"></i>
-                            Send Message
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- ==========================================
-         FOOTER
-         ========================================== -->
-    <footer class="footer">
-        <div class="footer-inner">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="#" class="nav-logo" style="margin-bottom:4px;">
-                        <div class="nav-logo-icon"><span>P</span></div>
-                        <span class="nav-logo-text">Pairing Hub</span>
-                    </a>
-                    <p>The most trusted platform for secure pairing code generation. Built with love for the global community.</p>
-                    <div class="footer-socials">
-                        <a href="#" class="footer-social-link" aria-label="Twitter"><i data-lucide="twitter" style="width:16px;height:16px;"></i></a>
-                        <a href="#" class="footer-social-link" aria-label="GitHub"><i data-lucide="github" style="width:16px;height:16px;"></i></a>
-                        <a href="#" class="footer-social-link" aria-label="LinkedIn"><i data-lucide="linkedin" style="width:16px;height:16px;"></i></a>
-                        <a href="#" class="footer-social-link" aria-label="YouTube"><i data-lucide="youtube" style="width:16px;height:16px;"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h4>Product</h4>
-                    <a href="#pairing">Code Generator</a>
-                    <a href="#features">Features</a>
-                    <a href="#stats">Statistics</a>
-                    <a href="#" id="changelogLink">Changelog</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Support</h4>
-                    <a href="#faq">FAQ</a>
-                    <a href="#contact">Contact Us</a>
-                    <a href="#" id="docsLink">Documentation</a>
-                    <a href="#" id="statusLink">Status Page</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Legal</h4>
-                    <a href="#" id="privacyLink">Privacy Policy</a>
-                    <a href="#" id="termsLink">Terms of Service</a>
-                    <a href="#" id="cookiesLink">Cookie Policy</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Pairing Hub. All rights reserved.</p>
-                <p>Crafted with precision and care.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- ==========================================
-         MODAL (for legal pages etc.)
-         ========================================== -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal" style="position:relative;">
-            <button class="modal-close" id="modalClose" aria-label="Close modal">
-                <i data-lucide="x" style="width:20px;height:20px;"></i>
-            </button>
-            <h3 id="modalTitle">Page Title</h3>
-            <p id="modalBody">Content goes here.</p>
-            <button class="btn-primary" id="modalOkBtn" style="width:100%;justify-content:center;">Got It</button>
-        </div>
+        <div class="result" id="result"></div>
     </div>
 
-    <!-- ==========================================
-         BACK TO TOP
-         ========================================== -->
-    <button class="back-to-top" id="backToTop" aria-label="Back to top">
-        <i data-lucide="chevron-up" style="width:22px;height:22px;"></i>
-    </button>
+    <div class="footer">𝐏𝐎𝐖𝐄𝐑𝐃 𝐁𝐘 𝐌𝐀𝐋𝐈𝐘𝐀 🤍</div>
+</div>
 
+<script>
+    async function getPairingCode() {
+        const input = document.getElementById('phoneInput');
+        const btn = document.getElementById('pairBtn');
+        const btnText = document.getElementById('btnText');
+        const resultDiv = document.getElementById('result');
 
-    <!-- ==========================================
-         JAVASCRIPT
-         ========================================== -->
-    <script>
-    /* ============================================
-       INITIALIZATION & LOADING SCREEN
-       ============================================ */
-    (function() {
-        'use strict';
+        const number = input.value.trim().replace(/[^0-9]/g, '');
 
-        // Loading screen progress simulation
-        const loaderFill = document.getElementById('loaderBarFill');
-        const loadingScreen = document.getElementById('loadingScreen');
-        let loadProgress = 0;
+        if (number.length < 7) {
+            showError('Invalid Format!');
+            return;
+        }
 
-        const loadInterval = setInterval(() => {
-            loadProgress += Math.random() * 25 + 10;
-            if (loadProgress >= 100) {
-                loadProgress = 100;
-                loaderFill.style.width = '100%';
-                clearInterval(loadInterval);
-                setTimeout(() => {
-                    loadingScreen.classList.add('hidden');
-                    // Initialize everything after loading screen
-                    initApp();
-                }, 400);
+        btn.disabled = true;
+        btnText.innerHTML = '<center><div class="loader"></div></center>';
+        resultDiv.classList.remove('show');
+
+        try {
+            const response = await fetch(`/pair?number=${number}`);
+            const data = await response.json();
+
+            if (data.code) {
+                showCode(data.code, number);
             } else {
-                loaderFill.style.width = loadProgress + '%';
+                showError(data.error || 'Connection Error');
             }
-        }, 200);
-
-        function initApp() {
-            // Initialize Lucide icons
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-            initParticles();
-            initNavbar();
-            initMobileMenu();
-            initCountrySelector();
-            initPhoneValidation();
-            initGenerateButton();
-            initCopyButton();
-            initRegenerateButton();
-            initBackToForm();
-            initFAQ();
-            initScrollReveal();
-            initStatCounters();
-            initTiltCards();
-            initRippleEffects();
-            initBackToTop();
-            initContactForm();
-            initModals();
-            initParallax();
+        } catch (err) {
+            showError('Server Offline');
+        } finally {
+            btn.disabled = false;
+            btnText.innerHTML = 'GET PAIRING CODE';
         }
+    }
 
-        /* ============================================
-           FLOATING PARTICLES
-           ============================================ */
-        function initParticles() {
-            const canvas = document.getElementById('particles-canvas');
-            const ctx = canvas.getContext('2d');
-            let particles = [];
-            let animId;
+    function showCode(code, number) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `
+            <div class="code-display">
+                <div class="code-text">${code}</div>
+                <div class="copy-link" onclick="copyCode('${code}')">CLICK TO COPY CODE</div>
+            </div>
+            <p style="font-size: 0.7rem; color: var(--muted); margin-top: 15px; line-height: 1.5; text-align: center;">
+                Go to WhatsApp Settings > Linked Devices > Link with Phone Number.
+            </p>
+        `;
+        resultDiv.classList.add('show');
+    }
 
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            resize();
-            window.addEventListener('resize', resize);
+    function showError(msg) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<div style="color: var(--error); text-align: center; font-size: 0.8rem; border: 1px solid var(--error); padding: 10px; border-radius: 5px;">${msg}</div>`;
+        resultDiv.classList.add('show');
+    }
 
-            // Create particles
-            const count = Math.min(60, Math.floor(window.innerWidth / 25));
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.3,
-                    vy: (Math.random() - 0.5) * 0.3,
-                    size: Math.random() * 2 + 0.5,
-                    opacity: Math.random() * 0.4 + 0.1,
-                    color: ['#00c8ff', '#a855f7', '#00ffd5', '#10b981'][Math.floor(Math.random() * 4)]
-                });
-            }
+    function copyCode(code) {
+        navigator.clipboard.writeText(code);
+        const link = document.querySelector('.copy-link');
+        link.innerText = 'COPIED SUCCESSFULLY!';
+        link.style.color = 'var(--neon)';
+        setTimeout(() => {
+            link.innerText = 'CLICK TO COPY CODE';
+            link.style.color = 'var(--muted)';
+        }, 2000);
+    }
 
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+    }
 
-                particles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-
-                    // Wrap around
-                    if (p.x < 0) p.x = canvas.width;
-                    if (p.x > canvas.width) p.x = 0;
-                    if (p.y < 0) p.y = canvas.height;
-                    if (p.y > canvas.height) p.y = 0;
-
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.globalAlpha = p.opacity;
-                    ctx.fill();
-                });
-
-                // Draw connections
-                ctx.globalAlpha = 1;
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 120) {
-                            ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = `rgba(0, 200, 255, ${0.06 * (1 - dist / 120)})`;
-                            ctx.lineWidth = 0.5;
-                            ctx.stroke();
-                        }
-                    }
-                }
-
-                animId = requestAnimationFrame(animate);
-            }
-            animate();
-
-            // Pause when not visible
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    cancelAnimationFrame(animId);
-                } else {
-                    animate();
-                }
-            });
+    let isPlaying = false;
+    const music = document.getElementById('bgMusic');
+    function toggleMusic() {
+        if (isPlaying) {
+            music.pause();
+            document.getElementById('mBtn').innerText = "MUSIC: OFF 🎵";
+        } else {
+            music.play();
+            document.getElementById('mBtn').innerText = "MUSIC: ON 🔊";
         }
+        isPlaying = !isPlaying;
+    }
+</script>
 
-        /* ============================================
-           NAVBAR SCROLL EFFECT
-           ============================================ */
-        function initNavbar() {
-            const navbar = document.getElementById('navbar');
-            let lastScroll = 0;
-
-            window.addEventListener('scroll', () => {
-                const currentScroll = window.scrollY;
-                if (currentScroll > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-                lastScroll = currentScroll;
-            }, { passive: true });
-        }
-
-        /* ============================================
-           MOBILE MENU
-           ============================================ */
-        function initMobileMenu() {
-            const toggle = document.getElementById('navToggle');
-            const links = document.getElementById('navLinks');
-
-            toggle.addEventListener('click', () => {
-                links.classList.toggle('mobile-open');
-            });
-
-            // Close on link click
-            links.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    links.classList.remove('mobile-open');
-                });
-            });
-        }
-
-        /* ============================================
-           COUNTRY SELECTOR
-           ============================================ */
-        function initCountrySelector() {
-            const select = document.getElementById('countrySelect');
-            const flag = document.getElementById('countryFlag');
-            const prefix = document.getElementById('phonePrefix');
-
-            select.addEventListener('change', () => {
-                const val = select.value;
-                const [code, flagEmoji] = val.split('|');
-                flag.textContent = flagEmoji;
-                prefix.textContent = code;
-                // Re-validate phone if has value
-                const phoneInput = document.getElementById('phoneInput');
-                if (phoneInput.value.trim()) {
-                    validatePhone(phoneInput.value.trim());
-                }
-            });
-        }
-
-        /* ============================================
-           PHONE VALIDATION
-           ============================================ */
-        let isValidPhone = false;
-
-        function initPhoneValidation() {
-            const input = document.getElementById('phoneInput');
-
-            // Only allow digits, spaces, dashes, parens
-            input.addEventListener('input', (e) => {
-                let val = e.target.value.replace(/[^\d\s\-\(\)]/g, '');
-                e.target.value = val;
-
-                if (val.trim().length >= 6) {
-                    validatePhone(val.trim());
-                } else if (val.trim().length > 0) {
-                    setValidation('', '');
-                    isValidPhone = false;
-                    updateGenerateBtn();
-                } else {
-                    setValidation('', '');
-                    isValidPhone = false;
-                    updateGenerateBtn();
-                }
-            });
-        }
-
-        function validatePhone(val) {
-            // Strip non-digits
-            const digits = val.replace(/\D/g, '');
-
-            if (digits.length < 6) {
-                setValidation('Phone number is too short', 'error');
-                document.getElementById('phoneInput').classList.add('error');
-                document.getElementById('phoneInput').classList.remove('valid');
-                isValidPhone = false;
-            } else if (digits.length > 15) {
-                setValidation('Phone number is too long', 'error');
-                document.getElementById('phoneInput').classList.add('error');
-                document.getElementById('phoneInput').classList.remove('valid');
-                isValidPhone = false;
-            } else if (!/^\d+$/.test(digits)) {
-                setValidation('Only digits are allowed', 'error');
-                document.getElementById('phoneInput').classList.add('error');
-                document.getElementById('phoneInput').classList.remove('valid');
-                isValidPhone = false;
-            } else {
-                setValidation('Valid phone number', 'success');
-                document.getElementById('phoneInput').classList.remove('error');
-                document.getElementById('phoneInput').classList.add('valid');
-                isValidPhone = true;
-            }
-            updateGenerateBtn();
-        }
-
-        function setValidation(msg, type) {
-            const el = document.getElementById('validationMsg');
-            el.textContent = msg;
-            el.className = 'validation-msg' + (type ? ' ' + type : '');
-        }
-
-        function updateGenerateBtn() {
-            document.getElementById('generateBtn').disabled = !isValidPhone;
-        }
-
-        /* ============================================
-           CODE GENERATION
-           ============================================ */
-        let currentCode = '';
-        let countdownInterval = null;
-        let countdownValue = 60;
-
-        function initGenerateButton() {
-            const btn = document.getElementById('generateBtn');
-            btn.addEventListener('click', (e) => {
-                createRipple(e, btn);
-                if (!isValidPhone) return;
-                startGeneration();
-            });
-        }
-
-        function startGeneration() {
-            const overlay = document.getElementById('loadingOverlay');
-            const progressBar = document.getElementById('loadingProgressBar');
-            const loadingText = document.getElementById('loadingText');
-
-            overlay.classList.add('active');
-            progressBar.style.width = '0%';
-
-            const messages = [
-                'Initializing secure channel...',
-                'Validating phone number...',
-                'Generating cryptographic seed...',
-                'Building pairing code...',
-                'Applying security layer...',
-                'Finalizing code...'
-            ];
-
-            let progress = 0;
-            let msgIndex = 0;
-
-            const interval = setInterval(() => {
-                progress += Math.random() * 18 + 5;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-
-                    progressBar.style.width = '100%';
-                    loadingText.textContent = 'Complete!';
-
-                    setTimeout(() => {
-                        overlay.classList.remove('active');
-                        generateAndShowCode();
-                    }, 400);
-                } else {
-                    progressBar.style.width = progress + '%';
-                    const newMsgIndex = Math.min(Math.floor(progress / 18), messages.length - 1);
-                    if (newMsgIndex !== msgIndex) {
-                        msgIndex = newMsgIndex;
-                        loadingText.textContent = messages[msgIndex];
-                    }
-                }
-            }, 150);
-        }
-
-        function generateAndShowCode() {
-            // Generate random 8-char alphanumeric code
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            currentCode = '';
-            for (let i = 0; i < 8; i++) {
-                currentCode += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-
-            // Display code
-            document.getElementById('codeValue').textContent = currentCode;
-
-            // Switch views
-            document.getElementById('pairingForm').style.display = 'none';
-            const codeDisplay = document.getElementById('codeDisplay');
-            codeDisplay.classList.add('active');
-
-            // Reset copy button
-            const copyBtn = document.getElementById('copyBtn');
-            copyBtn.classList.remove('copied');
-            copyBtn.querySelector('span').textContent = 'Copy Code';
-
-            // Disable regen
-            document.getElementById('regenBtn').disabled = true;
-
-            // Start countdown
-            startCountdown();
-
-            // Show success toast
-            showToast('success', 'Pairing code generated successfully!');
-        }
-
-        /* ============================================
-           COUNTDOWN TIMER
-           ============================================ */
-        function startCountdown() {
-            clearInterval(countdownInterval);
-            countdownValue = 60;
-            const circle = document.getElementById('countdownCircle');
-            const num = document.getElementById('countdownNum');
-            const text = document.getElementById('countdownText');
-            const circumference = 97.4; // 2 * PI * 15.5
-
-            circle.style.strokeDashoffset = '0';
-            num.textContent = '60';
-            text.textContent = '60 seconds';
-
-            countdownInterval = setInterval(() => {
-                countdownValue--;
-                if (countdownValue <= 0) {
-                    clearInterval(countdownInterval);
-                    countdownValue = 0;
-                    num.textContent = '0';
-                    text.textContent = 'expired';
-                    circle.style.strokeDashoffset = circumference.toString();
-
-                    // Enable regenerate
-                    document.getElementById('regenBtn').disabled = false;
-
-                    // Change circle color to red
-                    circle.style.stroke = '#ef4444';
-                    showToast('error', 'Code has expired. Click Regenerate to get a new one.');
-                } else {
-                    num.textContent = countdownValue;
-                    text.textContent = countdownValue + (countdownValue === 1 ? ' second' : ' seconds');
-                    const offset = circumference * (1 - countdownValue / 60);
-                    circle.style.strokeDashoffset = offset.toString();
-                }
-            }, 1000);
-        }
-
-        /* ============================================
-           COPY BUTTON
-           ============================================ */
-        function initCopyButton() {
-            const btn = document.getElementById('copyBtn');
-            btn.addEventListener('click', () => {
-                if (!currentCode) return;
-
-                navigator.clipboard.writeText(currentCode).then(() => {
-                    btn.classList.add('copied');
-                    btn.querySelector('span').textContent = 'Copied!';
-                    showToast('success', 'Code copied to clipboard!');
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
-                        btn.querySelector('span').textContent = 'Copy Code';
-                    }, 2500);
-                }).catch(() => {
-                    // Fallback
-                    const textarea = document.createElement('textarea');
-                    textarea.value = currentCode;
-                    textarea.style.position = 'fixed';
-                    textarea.style.opacity = '0';
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    btn.classList.add('copied');
-                    btn.querySelector('span').textContent = 'Copied!';
-                    showToast('success', 'Code copied to clipboard!');
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
-                        btn.querySelector('span').textContent = 'Copy Code';
-                    }, 2500);
-                });
-            });
-        }
-
-        /* ============================================
-           REGENERATE BUTTON
-           ============================================ */
-        function initRegenerateButton() {
-            const btn = document.getElementById('regenBtn');
-            btn.addEventListener('click', () => {
-                if (btn.disabled) return;
-
-                // Reset circle color
-                document.getElementById('countdownCircle').style.stroke = 'var(--neon-blue)';
-
-                startGeneration();
-            });
-        }
-
-        /* ============================================
-           BACK TO FORM
-           ============================================ */
-        function initBackToForm() {
-            const btn = document.getElementById('backToFormBtn');
-            btn.addEventListener('click', () => {
-                clearInterval(countdownInterval);
-                currentCode = '';
-                document.getElementById('codeDisplay').classList.remove('active');
-                document.getElementById('pairingForm').style.display = 'block';
-                document.getElementById('phoneInput').value = '';
-                document.getElementById('phoneInput').classList.remove('valid', 'error');
-                setValidation('', '');
-                isValidPhone = false;
-                updateGenerateBtn();
-            });
-        }
-
-        /* ============================================
-           TOAST NOTIFICATIONS
-           ============================================ */
-        function showToast(type, message) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'toast ' + type;
-
-            const iconMap = {
-                success: 'check-circle-2',
-                error: 'alert-circle',
-                info: 'info'
-            };
-
-            toast.innerHTML = `
-                <span class="toast-icon"><i data-lucide="${iconMap[type]}" style="width:20px;height:20px;"></i></span>
-                <span class="toast-text">${message}</span>
-            `;
-
-            container.appendChild(toast);
-            if (window.lucide) lucide.createIcons({ nodes: [toast] });
-
-            // Auto-remove
-            setTimeout(() => {
-                toast.classList.add('removing');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        /* ============================================
-           FAQ ACCORDION
-           ============================================ */
-        function initFAQ() {
-            document.querySelectorAll('.faq-question').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const item = btn.closest('.faq-item');
-                    const isOpen = item.classList.contains('open');
-
-                    // Close all
-                    document.querySelectorAll('.faq-item').forEach(i => {
-                        i.classList.remove('open');
-                        i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-                    });
-
-                    // Toggle clicked
-                    if (!isOpen) {
-                        item.classList.add('open');
-                        btn.setAttribute('aria-expanded', 'true');
-                    }
-                });
-            });
-        }
-
-        /* ============================================
-           SCROLL REVEAL
-           ============================================ */
-        function initScrollReveal() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -40px 0px'
-            });
-
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        }
-
-        /* ============================================
-           ANIMATED STAT COUNTERS
-           ============================================ */
-        function initStatCounters() {
-            let counted = false;
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !counted) {
-                        counted = true;
-                        animateCounters();
-                    }
-                });
-            }, { threshold: 0.3 });
-
-            const statsSection = document.getElementById('stats');
-            if (statsSection) observer.observe(statsSection);
-        }
-
-        function animateCounters() {
-            document.querySelectorAll('.stat-number').forEach(el => {
-                const target = parseInt(el.getAttribute('data-target'));
-                const duration = 2000;
-                const startTime = performance.now();
-
-                function update(currentTime) {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    // Ease out expo
-                    const eased = 1 - Math.pow(1 - progress, 4);
-                    const current = Math.floor(eased * target);
-
-                    // Format number
-                    if (target >= 1000000) {
-                        el.textContent = (current / 1000000).toFixed(1) + 'M+';
-                    } else if (target >= 1000) {
-                        el.textContent = Math.floor(current / 1000) + 'K+';
-                    } else {
-                        el.textContent = current + (target === 99 ? '.9%' : '+');
-                    }
-
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    } else {
-                        // Final exact value
-                        if (target >= 1000000) {
-                            el.textContent = (target / 1000000).toFixed(1) + 'M+';
-                        } else if (target >= 1000) {
-                            el.textContent = Math.floor(target / 1000) + 'K+';
-                        } else {
-                            el.textContent = target + (target === 99 ? '.9%' : '+');
-                        }
-                    }
-                }
-
-                requestAnimationFrame(update);
-            });
-        }
-
-        /* ============================================
-           CARD TILT EFFECT
-           ============================================ */
-        function initTiltCards() {
-            // Only on desktop
-            if (window.innerWidth < 768) return;
-
-            document.querySelectorAll('.tilt-card').forEach(card => {
-                card.addEventListener('mousemove', (e) => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-
-                    const rotateX = ((y - centerY) / centerY) * -5;
-                    const rotateY = ((x - centerX) / centerX) * 5;
-
-                    card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
-                });
-
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0)';
-                });
-            });
-        }
-
-        /* ============================================
-           RIPPLE CLICK EFFECT
-           ============================================ */
-        function initRippleEffects() {
-            document.querySelectorAll('.btn-primary, .btn-generate, .nav-cta').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    createRipple(e, btn);
-                });
-            });
-        }
-
-        function createRipple(e, element) {
-            const rect = element.getBoundingClientRect();
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-            element.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
-
-        /* ============================================
-           BACK TO TOP BUTTON
-           ============================================ */
-        function initBackToTop() {
-            const btn = document.getElementById('backToTop');
-
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 500) {
-                    btn.classList.add('visible');
-                } else {
-                    btn.classList.remove('visible');
-                }
-            }, { passive: true });
-
-            btn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        }
-
-        /* ============================================
-           CONTACT FORM
-           ============================================ */
-        function initContactForm() {
-            const form = document.getElementById('contactForm');
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                showToast('success', 'Message sent successfully! We\'ll get back to you soon.');
-                form.reset();
-            });
-        }
-
-        /* ============================================
-           MODAL SYSTEM
-           ============================================ */
-        function initModals() {
-            const overlay = document.getElementById('modalOverlay');
-            const closeBtn = document.getElementById('modalClose');
-            const okBtn = document.getElementById('modalOkBtn');
-            const title = document.getElementById('modalTitle');
-            const body = document.getElementById('modalBody');
-
-            const modalContent = {
-                changelog: {
-                    title: 'Changelog',
-                    body: 'Version 2.5.0 — Added 15 new countries, improved code generation speed by 40%, and introduced the new glassmorphism UI. Version 2.4.0 — Fixed validation issues for certain phone formats and added dark mode refinements.'
-                },
-                docs: {
-                    title: 'Documentation',
-                    body: 'Our documentation covers API integration, webhook setup, and advanced configuration options. Visit our docs portal for comprehensive guides, code examples, and best practices.'
-                },
-                status: {
-                    title: 'System Status',
-                    body: 'All systems are operational. Code generation engine: Online. API response time: 45ms average. Uptime: 99.9% over the last 90 days. No incidents reported.'
-                },
-                privacy: {
-                    title: 'Privacy Policy',
-                    body: 'Pairing Hub does not collect, store, or transmit any personal data. All code generation happens entirely in your browser. We use no cookies for tracking. No analytics that identify individuals.'
-                },
-                terms: {
-                    title: 'Terms of Service',
-                    body: 'By using Pairing Hub, you agree to use the service responsibly. Generated codes are for legitimate pairing purposes only. We reserve the right to modify the service at any time.'
-                },
-                cookies: {
-                    title: 'Cookie Policy',
-                    body: 'Pairing Hub uses minimal, essential cookies only for session management. We do not use advertising cookies, tracking cookies, or third-party analytics cookies.'
-                }
-            };
-
-            // Link event listeners
-            document.getElementById('changelogLink').addEventListener('click', (e) => { e.preventDefault(); openModal('changelog'); });
-            document.getElementById('docsLink').addEventListener('click', (e) => { e.preventDefault(); openModal('docs'); });
-            document.getElementById('statusLink').addEventListener('click', (e) => { e.preventDefault(); openModal('status'); });
-            document.getElementById('privacyLink').addEventListener('click', (e) => { e.preventDefault(); openModal('privacy'); });
-            document.getElementById('termsLink').addEventListener('click', (e) => { e.preventDefault(); openModal('terms'); });
-            document.getElementById('cookiesLink').addEventListener('click', (e) => { e.preventDefault(); openModal('cookies'); });
-
-            function openModal(key) {
-                const content = modalContent[key];
-                if (!content) return;
-                title.textContent = content.title;
-                body.textContent = content.body;
-                overlay.classList.add('active');
-                if (window.lucide) lucide.createIcons({ nodes: [overlay] });
-            }
-
-            function closeModal() {
-                overlay.classList.remove('active');
-            }
-
-            closeBtn.addEventListener('click', closeModal);
-            okBtn.addEventListener('click', closeModal);
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) closeModal();
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && overlay.classList.contains('active')) {
-                    closeModal();
-                }
-            });
-        }
-
-        /* ============================================
-           MOUSE PARALLAX ON HERO
-           ============================================ */
-        function initParallax() {
-            if (window.innerWidth < 768) return;
-
-            const hero = document.querySelector('.hero-inner');
-            const floats = document.querySelectorAll('.hero-float');
-
-            document.addEventListener('mousemove', (e) => {
-                const cx = window.innerWidth / 2;
-                const cy = window.innerHeight / 2;
-                const dx = (e.clientX - cx) / cx;
-                const dy = (e.clientY - cy) / cy;
-
-                floats.forEach((el, i) => {
-                    const speed = (i + 1) * 8;
-                    el.style.transform = `translate(${dx * speed}px, ${dy * speed}px)`;
-                });
-            });
-        }
-
-    })();
-    </script>
 </body>
 </html>
+
