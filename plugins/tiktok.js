@@ -1,198 +1,206 @@
-// plugins/ACD_TIKTOK.js — TikTok Downloader (WhiteShadow API + Buttons)
-const { cmd } = require('../command');
-const { getBuffer } = require('../lib/functions');
-const axios = require('axios');
-const config = require('../config');
+// plugins/ACD_TIKTOK.js — TikTok Downloader (Auto DL + Buttons + Menu)
+// ---------------------------------------------------------------------
+// Framework assumptions (edit if your loader differs):
+//   - Global/require: cmd, commands (command registration helper)
+//   - conn, mek, from, reply available inside handler
+//   - getBuffer(url) -> axios/fetch buffer helper already exists elsewhere
+//   - BOT_NAME, TIKTOK_IMG constants exist elsewhere (fallbacks added below)
+// ---------------------------------------------------------------------
 
-const FOOTER = config.footer || '> ᴛɪᴋᴛᴏᴋ ᴅᴏᴡɴʟᴏᴀᴅᴇʀ';
-const TIKTOK_IMG = 'https://files.catbox.moe/chtymz.jpg';
-const BOT_NAME = config.BOT_NAME || '𝐙𝐞𝐭𝐚 〽️𝓲𝓷𝓲';
+const axios = require("axios");
 
-// ── Session store ───────
-const tiktokSession = new Map();
+// ── Fallbacks (remove if your bot already defines these globally) ──
+const BOT_NAME = global.BOT_NAME || "𝐙𝐞𝐭𝐚 𝐌𝐝";
+const TIKTOK_IMG =
+    global.TIKTOK_IMG ||
+    "https://telegra.ph/file/6a5c4e3f5e2b6b1b1b1b1.jpg"; // replace with your own thumb
 
 function getDateTimeLine() {
-    const now = new Date();
-    return now.toLocaleString('en-LK', { 
-        timeZone: 'Asia/Colombo', 
-        dateStyle: 'medium', 
-        timeStyle: 'short' 
+    return new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Colombo",
+        dateStyle: "medium",
+        timeStyle: "short",
     });
 }
 
-// ── WhiteShadow API Fetcher ───────
-async function getTTData(url) {
-    const apiUrl = `https://whiteshadow-x-api.onrender.com/api/download/tiktok?url=${encodeURIComponent(url)}&apitoken=aWK0z4`;
+if (!global.getBuffer) {
+    global.getBuffer = async (url) => {
+        const res = await axios.get(url, { responseType: "arraybuffer" });
+        return Buffer.from(res.data);
+    };
+}
+const getBuffer = global.getBuffer;
 
-    const { data } = await axios.get(apiUrl, {
-        timeout: 30000
-    });
+// In-memory session store: sessionId -> tiktok data
+const tiktokSession = global.tiktokSession || new Map();
+global.tiktokSession = tiktokSession;
 
-    const res = data.result;
+// ── TikTok fetch helper (tikwm.com free API — swap URL below if you
+//    have a different / paid "WhiteShadow" endpoint) ──────────────
+async function fetchTikTok(url) {
+    const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`;
+    const { data } = await axios.get(api, { timeout: 20000 });
 
-    // ⚠️ API එකේ code -1 නම් එන error එක එහෙමම throw කරනවා
-    if (res.code === -1 || !res.video) {
-        throw new Error(res.msg || "URL parsing failed. නිවැරදි TikTok link එකක් භාවිතා කරන්න.");
+    if (!data || data.code !== 0 || !data.data) {
+        throw new Error("TikTok දත්ත ලබාගැනීමට නොහැකි විය. Link එක නිවැරදිද බලන්න.");
     }
 
-    // WhiteShadow API response එක standard format එකට map කරනවා
+    const d = data.data;
     return {
-        title: res.title || "No Title",
-        author: {
-            nickname: res.author?.nickname || res.author?.name || "Unknown",
-            unique_id: res.author?.unique_id || res.author?.id || ""
-        },
+        title: d.title || "No Caption",
+        author: { nickname: d.author?.nickname, unique_id: d.author?.unique_id },
         stats: {
-            digg_count: res.statistics?.digg_count || res.stats?.likes || 0,
-            comment_count: res.statistics?.comment_count || res.stats?.comments || 0,
-            share_count: res.statistics?.share_count || res.stats?.shares || 0,
-            play_count: res.statistics?.play_count || res.stats?.views || 0
+            digg_count: d.digg_count,
+            comment_count: d.comment_count,
+            share_count: d.share_count,
+            play_count: d.play_count,
         },
-        video: {
-            noWatermark: res.video?.noWatermark || res.video?.nowm || null,
-            hd: res.video?.hd || res.video?.hdplay || null,
-            wm: res.video?.watermark || res.video?.wm || null
-        },
-        music: {
-            play: res.music || res.audio || null
-        },
-        cover: res.cover || res.origin_cover || TIKTOK_IMG
+        thumb: d.cover || d.origin_cover,
+        // No-watermark direct video URL
+        videoNW: d.play,
+        // HD (if available) falls back to normal
+        video: d.hdplay || d.play,
+        // Audio-only URL
+        audio: d.music,
     };
 }
 
-// ── MAIN CMD ────────────────────────────────────────────
-cmd({
-    pattern: "tt",
-    alias: ["tiktok", "tik"],
-    desc: "Download TikTok Videos",
-    category: "downloader",
-    react: "🎬",
-    filename: __filename
-}, async (conn, mek, m, { from, args, reply }) => {
-    try {
-        const url = args[0];
-        
-        if (!url || !url.includes("tiktok.com")) {
-            return reply(`*❌ වැරදි භාවිතය!*\n\n*නිවැරදි විදිහ:* \`.tt <TikTok URL>\`\n\n*උදාහරණ:* \`.tt https://vm.tiktok.com/ZMxxxxxxx/\``);
-        }
+function makeSessionId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
 
-        await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
-
-        const res = await getTTData(url);
-
-        if (!res.video?.noWatermark && !res.video?.hd) {
-            throw new Error("Video URL හමු නොවීය");
-        }
-
-        // Save to session
-        const sessionId = m.key.id;
-        tiktokSession.set(sessionId, {
-            video: res.video.hd || res.video.noWatermark,
-            videoNW: res.video.noWatermark,
-            audio: res.music?.play,
-            title: res.title,
-            thumb: res.cover,
-            author: res.author,
-            stats: res.stats,
-            sender: m.sender
-        });
-
-        // Get video buffer
-        const videoUrl = res.video.hd || res.video.noWatermark;
-        const videoBuf = await getBuffer(videoUrl);
-
-        if (!videoBuf || videoBuf.length < 1000) {
-            throw new Error("Video Download අසාර්ථක විය");
-        }
-
-        const caption = `
+// ── Build the WhatsApp button message for a fetched TikTok ─────────
+function buildTikTokButtons(session, sessionId) {
+    const caption = `
 ╭━━━〔 *𝐓𝐈𝐊𝐓𝐎𝐊 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑* 〕━━━╮
 ┃
-┃ 📌 *Title:* ${res.title}
+┃ 📌 *Title:* ${session.title}
+┃ 👤 *Author:* ${session.author?.nickname || "Unknown"}
 ┃
-┃ 👤 *Author:* ${res.author.nickname}
-┃ 🆔 *Username:* @${res.author.unique_id}
-┃
-┃ ❤️ *Likes:* ${res.stats.digg_count.toLocaleString()}
-┃ 💬 *Comments:* ${res.stats.comment_count.toLocaleString()}
-┃ 🔄 *Shares:* ${res.stats.share_count.toLocaleString()}
-┃ ▶️ *Views:* ${res.stats.play_count.toLocaleString()}
-┃
-┃ 📅 *Downloaded:* ${getDateTimeLine()}
+┃ ❤️ ${session.stats?.digg_count?.toLocaleString() || 0}   💬 ${session.stats?.comment_count?.toLocaleString() || 0}   🔄 ${session.stats?.share_count?.toLocaleString() || 0}
 ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-
-✅ *No Watermark • HD Quality*
+> *Choose an option below 👇*
 `.trim();
 
-        await conn.sendMessage(from, {
-            video: videoBuf,
-            caption: caption,
-            mimetype: 'video/mp4'
-        }, { quoted: mek });
+    return {
+        image: { url: session.thumb || TIKTOK_IMG },
+        caption,
+        footer: BOT_NAME,
+        buttons: [
+            { buttonId: `ttvideonw_${sessionId}`, buttonText: { displayText: "📹 No-WM Video" }, type: 1 },
+            { buttonId: `ttaudio_${sessionId}`, buttonText: { displayText: "🎵 Audio Only" }, type: 1 },
+            { buttonId: `ttinfo_${sessionId}`, buttonText: { displayText: "📊 Video Info" }, type: 1 },
+        ],
+        headerType: 4,
+    };
+}
 
-        // ── LIST BUTTONS ──
-        const sections = [
-            {
-                title: "🎬 𝐓𝐈𝐊𝐓𝐎𝐊 𝐎𝐏𝐓𝐈𝐎𝐍𝐒",
-                rows: [
-                    {
-                        title: "🎵 Audio Download (MP3)",
-                        description: "Song/Audio එක බාගන්න",
-                        rowId: `ttaudio_${sessionId}`
-                    },
-                    {
-                        title: "📹 No Watermark Video",
-                        description: "Watermark නැති Video එක නැවත බාගන්න",
-                        rowId: `ttvideonw_${sessionId}`
-                    },
-                    {
-                        title: "📊 Full Video Info",
-                        description: "සම්පූර්ණ Information බලන්න",
-                        rowId: `ttinfo_${sessionId}`
-                    }
-                ]
-            },
-            {
-                title: "⚡ 𝐐𝐔𝐈𝐂𝐊 𝐀𝐂𝐂𝐄𝐒𝐒",
-                rows: [
-                    {
-                        title: "📋 Bot Menu",
-                        description: "සියලු Commands ලැයිස්තුව බලන්න",
-                        rowId: `ttmenu_${sessionId}`
-                    },
-                    {
-                        title: "🏓 Bot Ping",
-                        description: "Bot Speed පරීක්ෂා කරන්න",
-                        rowId: `ttping_${sessionId}`
-                    }
-                ]
+// ── Main-menu / status button set (matches the screenshot layout) ──
+function buildMainListMessage(sessionId = "menu") {
+    return {
+        image: { url: TIKTOK_IMG },
+        caption: `*${BOT_NAME}*\n\nSelect an option below.`,
+        footer: BOT_NAME,
+        buttons: [
+            { buttonId: `ttmenu_${sessionId}`, buttonText: { displayText: "↩ Main Menu 🏠" }, type: 1 },
+            { buttonId: `ttping_${sessionId}`, buttonText: { displayText: "↩ Bot Status ✅" }, type: 1 },
+        ],
+        headerType: 4,
+    };
+}
+
+// =====================================================================
+// COMMAND: .tt <tiktok url>  — auto fetch + auto-download NW video + buttons
+// =====================================================================
+cmd(
+    {
+        pattern: "tt",
+        alias: ["tiktok", "tt2"],
+        desc: "Download TikTok video (auto, no watermark) + interactive buttons",
+        category: "download",
+        filename: __filename,
+    },
+    async (conn, mek, m, { from, args, reply, q }) => {
+        try {
+            const url = q || args[0];
+            if (!url || !url.includes("tiktok.com")) {
+                return reply(
+                    "*📥 TikTok Downloader*\n\nUsage:\n`.tt <tiktok video url>`\n\nExample:\n`.tt https://vt.tiktok.com/xxxxx`"
+                );
             }
-        ];
 
-        const listMsg = {
-            text: `*✅ Video එක යවන ලදි!*\n\n📝 *${res.title}*\n\nපහතින් Options බලන්න 👇`,
-            footer: FOOTER,
-            buttonText: "𝐕𝐢𝐞𝐰 𝐎𝐩𝐭𝐢𝐨𝐧𝐬",
-            sections
-        };
+            await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
 
-        await conn.sendMessage(from, listMsg, { quoted: mek });
-        await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+            const data = await fetchTikTok(url);
+            const sessionId = makeSessionId();
+            tiktokSession.set(sessionId, data);
 
-    } catch (e) {
-        console.error("[TT ERROR]", e);
-        await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-        reply(`*❌ Error:* ${e.message}`);
+            // auto-expire session after 15 min to avoid memory leaks
+            setTimeout(() => tiktokSession.delete(sessionId), 15 * 60 * 1000);
+
+            // ── Auto-download the no-watermark video immediately ──
+            if (data.videoNW) {
+                const videoBuf = await getBuffer(data.videoNW);
+                if (!videoBuf || videoBuf.length < 1000) {
+                    throw new Error("Video buffer ලබාගැනීමට අසාර්ථක විය.");
+                }
+
+                const niceCaption = `
+╭━━━〔 *✅ 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐃* 〕━━━╮
+┃ 📌 ${data.title}
+┃ 👤 @${data.author?.unique_id || "unknown"}
+┃ ❤️ ${data.stats?.digg_count?.toLocaleString() || 0}  ▶️ ${data.stats?.play_count?.toLocaleString() || 0}
+╰━━━━━━━━━━━━━━━━━━━━━━━━━╯
+> *${BOT_NAME} — No Watermark*
+`.trim();
+
+                await conn.sendMessage(
+                    from,
+                    { video: videoBuf, mimetype: "video/mp4", caption: niceCaption },
+                    { quoted: mek }
+                );
+            }
+
+            // ── Then send the interactive button card for extra options ──
+            const btnMsg = buildTikTokButtons(data, sessionId);
+            await conn.sendMessage(from, btnMsg, { quoted: mek });
+
+            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+        } catch (e) {
+            console.error("[TT CMD ERROR]", e);
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+            reply(`*❌ Error:* ${e.message}`);
+        }
     }
-});
+);
 
-// ── BUTTON HANDLER ───────────────────────────────────────────────
-cmd({
-    on: "text",
-    fromMe: false,
-    dontAddCommandList: true
-}, async (conn, mek, m, { from, reply }) => {
+// =====================================================================
+// COMMAND: .menu — sends the Main Menu / Bot Status button card
+// =====================================================================
+cmd(
+    {
+        pattern: "menu",
+        alias: ["allmenu", "help2"],
+        desc: "Show bot menu with interactive buttons",
+        category: "main",
+        filename: __filename,
+    },
+    async (conn, mek, m, { from, reply }) => {
+        try {
+            await conn.sendMessage(from, { react: { text: "📋", key: mek.key } });
+            await conn.sendMessage(from, buildMainListMessage(), { quoted: mek });
+        } catch (e) {
+            console.error("[MENU CMD ERROR]", e);
+            reply(`*❌ Error:* ${e.message}`);
+        }
+    }
+);
+
+// =====================================================================
+// BUTTON RESPONSE HANDLER
+// =====================================================================
+cmd({ on: "body" }, async (conn, mek, m, { from, reply, isGroup }) => {
     try {
         let selectedId = null;
 
@@ -251,11 +259,11 @@ cmd({
             return;
         }
 
-        // ── PING BUTTON ──
+        // ── PING / STATUS BUTTON ──
         if (action === "ping") {
             await conn.sendMessage(from, { react: { text: "🏓", key: mek.key } });
             const start = Date.now();
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise((r) => setTimeout(r, 100));
             const ping = Date.now() - start;
             const pingMsg = `
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━╮
@@ -275,7 +283,7 @@ cmd({
         // ── TIKTOK ACTIONS (need session) ──
         const session = tiktokSession.get(sessionId);
         if (!session) {
-            return reply("*❌ Session expired. නැවත \`.tt\` command එක run කරන්න.*");
+            return reply("*❌ Session expired. නැවත `.tt` command එක run කරන්න.*");
         }
 
         await conn.sendMessage(from, { react: { text: "⏳", key: mek.key } });
@@ -284,14 +292,22 @@ cmd({
             if (!session.audio) return reply("*❌ Audio එක හමු නොවීය*");
             const audioBuf = await getBuffer(session.audio);
             if (!audioBuf || audioBuf.length < 1000) throw new Error("Audio Download Failed");
-            await conn.sendMessage(from, { audio: audioBuf, mimetype: 'audio/mpeg', fileName: `${session.title}.mp3` }, { quoted: mek });
+            await conn.sendMessage(
+                from,
+                { audio: audioBuf, mimetype: "audio/mpeg", fileName: `${session.title}.mp3` },
+                { quoted: mek }
+            );
             await conn.sendMessage(from, { react: { text: "🎵", key: mek.key } });
         }
 
         if (action === "videonw") {
             if (!session.videoNW) return reply("*❌ Video URL නැත*");
             const videoBuf = await getBuffer(session.videoNW);
-            await conn.sendMessage(from, { video: videoBuf, mimetype: 'video/mp4', caption: `*✅ No Watermark Video*\n\n📝 ${session.title}` }, { quoted: mek });
+            await conn.sendMessage(
+                from,
+                { video: videoBuf, mimetype: "video/mp4", caption: `*✅ No Watermark Video*\n\n📝 ${session.title}` },
+                { quoted: mek }
+            );
             await conn.sendMessage(from, { react: { text: "📹", key: mek.key } });
         }
 
@@ -317,7 +333,6 @@ cmd({
             await conn.sendMessage(from, { image: { url: session.thumb || TIKTOK_IMG }, caption: info }, { quoted: mek });
             await conn.sendMessage(from, { react: { text: "📊", key: mek.key } });
         }
-
     } catch (e) {
         console.error("[TT BTN ERROR]", e);
         await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
