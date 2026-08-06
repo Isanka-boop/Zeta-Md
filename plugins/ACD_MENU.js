@@ -8,10 +8,10 @@
 // ---------------------------------------------------------------------
 
 // ── Fallback globals (remove if your bot already defines these) ──
-const BOT_NAME = global.BOT_NAME || "𝐙𝐄𝐓𝐀 𝐌𝐃 🚀";
+const BOT_NAME = global.BOT_NAME || "𝐙𝐄𝐓𝐀 𝐌𝐃 ";
 const BOT_VERSION = global.BOT_VERSION || "1.0.0";
 const OWNER_NAME = global.OWNER_NAME || "𝐈𝐒𝐀𝐍𝐊𝐀";
-const GLOBAL_FOOTER = global.GLOBAL_FOOTER || `\n> _Powered by ${BOT_NAME}_`;
+const GLOBAL_FOOTER = global.GLOBAL_FOOTER || `\n> _ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴢᴇᴛᴀ ᴍɪɴɪ_`;
 
 // category(lowercase) -> thumbnail url. 'main', 'detail', 'other' are special keys.
 const CAT_IMAGES = global.CAT_IMAGES || {
@@ -124,7 +124,7 @@ cmd(
             setState(sender, { stage: "main", prefix });
 
             const listMsg = {
-                image: { url: CAT_IMAGES["main"] || CAT_IMAGES["other"] },
+                image: { url: CAT_IMAGES[""] || CAT_IMAGES[""] },
                 caption:
                     `╭━━━〔 *${BOT_NAME}* 〕━━━╮\n` +
                     `┃ 📂 Browse commands by category\n` +
@@ -257,7 +257,7 @@ cmd(
             text += GLOBAL_FOOTER;
 
             try {
-                const imgBuf = await getBuffer(CAT_IMAGES["main"] || CAT_IMAGES["other"]);
+                const imgBuf = await getBuffer(CAT_IMAGES[""] || CAT_IMAGES[""]);
                 await conn.sendMessage(from, { image: imgBuf, caption: text, mimetype: "image/jpeg" }, { quoted: mek });
             } catch {
                 reply(text);
