@@ -39,7 +39,7 @@ async (robin, mek) => {
 
     // LIST MESSAGE - 100% වැඩ
     const msg = {
-        image: { url: '' },
+        image: { url: 'https://files.catbox.moe/chtymz.jpg' },
         caption: text + "\n\n > ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
         footer: "Baduwa Bot",
         templateButtons: [
