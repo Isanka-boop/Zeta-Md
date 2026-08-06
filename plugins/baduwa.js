@@ -4,8 +4,9 @@ let cd = new Set();
 
 const replies = [
     "*කවුද හුත්තෝ බඩුව කියලා?* 🤨",
-    "*බඩුව? ඔයා ද?* 😂",
-    "*මෙහෙ බඩුවක් නෑ... ඉන්නේ ඔයා විතරයි* 😏"
+    "*නෙත්මි බඩුව* 😂",
+    "*මෙහෙ බඩුවක් නෑ... ඉන්නේ ඔයා විතරයි* 😏",
+    "*සවනි බඩුව* 😂"
 ];
 
 const vcard = `BEGIN:VCARD
@@ -20,7 +21,7 @@ END:VCARD`;
 cmd({
     pattern: "baduwa",
     alias: ["badu"],
-    react: "😏",
+    react: "🖕",
     category: "fun",
     filename: __filename
 },
@@ -39,7 +40,7 @@ async (robin, mek) => {
     // LIST MESSAGE - 100% වැඩ
     const msg = {
         image: { url: '' },
-        caption: text + "\n\n> ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
+        caption: text + "\n\n > ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
         footer: "Baduwa Bot",
         templateButtons: [
             { index: 1, urlButton: { displayText: 'GitHub', url: 'https://github.com' } }, // උදාහරණයක්
