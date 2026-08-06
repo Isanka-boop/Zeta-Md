@@ -56,9 +56,7 @@ async (robin, mek) => {
 
 
 
-const { cmd } = require('../command');
-
-const baduwaReplies = [
+const ponnayaReplies = [
     "*කවුද හුත්තෝ පොන්නයා කියලා?* 🤨"
 ];
 
@@ -75,7 +73,7 @@ async (robin, mek) => {
         const from = mek.key.remoteJid;
         await robin.sendMessage(from, { react: { text: "🫵", key: mek.key } });
         
-        const random = baduwaReplies[Math.floor(Math.random() * baduwaReplies.length)];
+        const random = ponnayaReplies[Math.floor(Math.random() * ponnayaReplies.length)];
         await robin.sendMessage(from, { text: random }, { quoted: mek });
         
     } catch (e) {
@@ -97,7 +95,7 @@ async (robin, mek) => {
 
         if (text.includes("බඩුව")) {
             await robin.sendMessage(from, { react: { text: "😏", key: mek.key } });
-            const random = baduwaReplies[Math.floor(Math.random() * baduwaReplies.length)];
+            const random = ponnayaReplies[Math.floor(Math.random() * ponnayaReplies.length)];
             await robin.sendMessage(from, { text: random }, { quoted: mek });
         }
     } catch (e) {
