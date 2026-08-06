@@ -57,6 +57,15 @@ const GLOBAL_FOOTER = `\n╭───────────╮\n> 𝙿σ𝚆є
 // ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
 const menuState = new Map();
 
+// ── Race any promise against a timeout so a hung network call (e.g.
+//    a dead image host) can never block a command from ever replying ──
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms))
+  ]);
+}
+
 // ══════════════════════════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════════════════════════
@@ -135,7 +144,6 @@ cmd({
 
     let menuText = ``;
     menuText += `👋 𝐇𝐄𝐘 ${pushname} 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐙𝐄𝐓𝐀 🫵\n`;
-    
     menuText += `╭━━━〔 𝐙𝐄𝐓𝐀 𝐌𝐄𝐍𝐔〕━✦\n`;
     menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
     menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
@@ -269,35 +277,22 @@ cmd({
 // ══════════════════════════════════════════════════════════════════
 // sendAliveButtons — real native-flow quick_reply buttons via
 // relayMessage (same proven approach used across the bot, e.g.
-// pinterest.js / tiktok.js). The `id` of each quick_reply button is
-// the full command text (e.g. ".menu"), and pair.js already unpacks
+// pinterest.js / tiktok.js), TEXT ONLY — no image/header media.
+// The `id` of each quick_reply button is the full command text
+// (e.g. ".menu"), and pair.js already unpacks
 // interactiveResponseMessage → nativeFlowResponseMessage.paramsJson.id
 // as the message body, so tapping a button re-runs that command
 // exactly as if the user had typed it — no extra response handler
 // needed.
 // ══════════════════════════════════════════════════════════════════
-async function sendAliveButtons(conn, from, mek, { imageUrl, caption, footer, buttons }) {
+async function sendAliveButtons(conn, from, mek, { caption, footer, buttons }) {
   try {
-    let header;
-    try {
-      const imgBuf = await getBuffer(imageUrl);
-      const media = await prepareWAMessageMedia(
-        { image: imgBuf },
-        { upload: conn.waUploadToServer }
-      );
-      header = proto.Message.InteractiveMessage.Header.fromObject({
-        hasMediaAttachment: true, ...media
-      });
-    } catch {
-      header = proto.Message.InteractiveMessage.Header.fromObject({
-        title: '', hasMediaAttachment: false
-      });
-    }
-
     const interactiveMessage = proto.Message.InteractiveMessage.fromObject({
       body: proto.Message.InteractiveMessage.Body.fromObject({ text: caption }),
       footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: footer }),
-      header,
+      header: proto.Message.InteractiveMessage.Header.fromObject({
+        title: '', hasMediaAttachment: false
+      }),
       nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons })
     });
 
@@ -310,7 +305,10 @@ async function sendAliveButtons(conn, from, mek, { imageUrl, caption, footer, bu
       }
     }, { quoted: mek, userJid: conn.user.id });
 
-    await conn.relayMessage(from, waMsg.message, { messageId: waMsg.key.id });
+    await withTimeout(
+      conn.relayMessage(from, waMsg.message, { messageId: waMsg.key.id }),
+      10000
+    );
     return true;
   } catch (e) {
     console.error('[ALIVE BUTTON SEND ERROR]', e);
@@ -319,7 +317,7 @@ async function sendAliveButtons(conn, from, mek, { imageUrl, caption, footer, bu
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ALIVE COMMAND — Hacker Font Backticks + Image + Reply + Global Footer
+// ALIVE COMMAND — Text Only (no photo) + Global Footer
 //                  + .menu / .ping quick-reply buttons
 // ══════════════════════════════════════════════════════════════════
 cmd({
@@ -353,26 +351,29 @@ cmd({
       { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '🏓 Ping', id: `${px}ping` }) }
     ];
 
-    const sent = await sendAliveButtons(conn, from, mek, {
-      imageUrl: CAT_IMAGES['alive'],
-      caption: text,
-      footer: GLOBAL_FOOTER,
-      buttons
-    });
+    const hintText = text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`;
 
-    if (!sent) {
-      // Fallback: plain image/text reply with a typed-command hint
-      try {
-        const imgBuf = await getBuffer(CAT_IMAGES['alive']);
-        await conn.sendMessage(from, {
-          image: imgBuf,
-          caption: text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`,
-          mimetype: 'image/jpeg'
-        }, { quoted: mek });
-      } catch {
-        reply(text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`);
-      }
+    // Guaranteed-reply chain: buttons (text only) → plain text.
+    // Timeout means a stuck relay can never leave the command
+    // hanging with just a react and no reply.
+    let sent = false;
+    try {
+      sent = await withTimeout(
+        sendAliveButtons(conn, from, mek, {
+          caption: text,
+          footer: GLOBAL_FOOTER,
+          buttons
+        }),
+        15000
+      );
+    } catch (e) {
+      console.error('[ALIVE BUTTONS TIMEOUT/ERROR]', e.message);
     }
+
+    if (sent) return;
+
+    // Last resort: plain text always goes through.
+    reply(hintText);
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
 
