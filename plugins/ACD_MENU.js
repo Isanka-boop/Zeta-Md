@@ -354,7 +354,7 @@ cmd({
     ];
 
     const sent = await sendAliveButtons(conn, from, mek, {
-      imageUrl: CAT_IMAGES[''],
+      imageUrl: CAT_IMAGES['alive'],
       caption: text,
       footer: GLOBAL_FOOTER,
       buttons
