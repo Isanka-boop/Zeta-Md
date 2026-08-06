@@ -1,127 +1,86 @@
 const { cmd } = require('../command');
 
-const baduwaReplies = [
-    "*කවුද හුත්තෝ බඩුව කියලා?* 🤨",
-    "*අයියෝ බඩුවක් කිව්වේ කාටද බන්?* 😂",
-    "*මෙහෙ බඩුවක් නෑ නේ... ඔයා විතරයි ඉන්නේ* 😏"
-];
-
-// COMMAND
-const { cmd } = require('../command');
-
 cmd({
     pattern: "baduwa",
     alias: ["badu"],
-    desc: "Fun with buttons",
-    category: "fun",
     react: "😏",
-    filename: __filename
-}, 
-async (robin, mek) => {
-    try {
-        const from = mek.key.remoteJid;
-        
-        // React
-        await robin.sendMessage(from, { react: { text: "😏", key: mek.key } });
-        
-        const randomReplies = [
-            "*කවුද හුත්තෝ බඩුව කියලා?* 🤨",
-            "*අයියෝ බඩුවක් කිව්වේ කාටද බන්?* 😂",
-            "*මෙහෙ බඩුවක් නෑ නේ... ඔයා විතරයි ඉන්නේ* 😏"
-        ];
-        const random = randomReplies[Math.floor(Math.random() * randomReplies.length)];
-
-        // Button Message
-        const buttonMessage = {
-            text: random,
-            footer: "👇 තව ආතල් ඕන නම්",
-            buttons: [
-                { buttonId: '.baduwa', buttonText: { displayText: 'තව එකක් 😏' }, type: 1 },
-                { buttonId: '.menu', buttonText: { displayText: 'Menu 📜' }, type: 1 },
-                { buttonId: '.ping', buttonText: { displayText: 'Ping 🚀' }, type: 1 }
-            ],
-            headerType: 1
-        };
-
-        await robin.sendMessage(from, buttonMessage, { quoted: mek });
-
-    } catch (e) {
-        console.log(e)
-    }
-});
-
-// AUTO DETECT
-cmd({
-    on: "body" // සමහර bot වල on: "text" වෙනුවට on: "body"
-}, 
-async (robin, mek) => {
-    try {
-        const from = mek.key.remoteJid;
-        const body = mek.message?.conversation || mek.message?.extendedTextMessage?.text || "";
-        
-        if(!body) return;
-        const text = body.toLowerCase();
-
-        if (text.includes("බඩුව")) {
-            await robin.sendMessage(from, { react: { text: "😏", key: mek.key } });
-            const random = baduwaReplies[Math.floor(Math.random() * baduwaReplies.length)];
-            await robin.sendMessage(from, { text: random }, { quoted: mek });
-        }
-    } catch (e) {
-        console.log(e)
-    }
-});
-
-
-
-// Ponnaya ///////
-
-
-
-
-const ponnayaReplies = [
-    "*කවුද හුත්තෝ පොන්නයා කියලා?* 🤨"
-];
-
-// COMMAND
-cmd({
-    pattern: "ponnaya",
-    alias: ["ponna"],
-    react: "🫵",
     category: "fun",
     filename: __filename
-}, 
+},
 async (robin, mek) => {
-    try {
-        const from = mek.key.remoteJid;
-        await robin.sendMessage(from, { react: { text: "🫵", key: mek.key } });
-        
-        const random = ponnayaReplies[Math.floor(Math.random() * ponnayaReplies.length)];
-        await robin.sendMessage(from, { text: random }, { quoted: mek });
-        
-    } catch (e) {
-        console.log(e)
-    }
+    const from = mek.key.remoteJid;
+    await robin.sendMessage(from, { react: { text: "😏", key: mek.key } });
+
+    const replies = ["*කවුද හුත්තෝ බඩුව කියලා?* 🤨", "*බඩුව? ඔයා ද?* 😂"];
+    const random = replies[Math.floor(Math.random() * replies.length)];
+
+    // FAKE VCARD DATA
+    const fakeContact = {
+        displayName: "Baduwa King 👑", // පෙන්නන නම
+        vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Baduwa King 👑
+ORG:Baduwa Company;
+TEL;type=CELL;type=VOICE;waid=94771234567:+94 77 123 4567
+EMAIL:baduwa.king@fake.com
+END:VCARD`
+    };
+
+    // BUTTONS + CONTACT
+    const buttonMessage = {
+        text: random,
+        footer: "👇 Contact එකත් බලන්න",
+        buttons: [
+            { buttonId: '.baduwa', buttonText: { displayText: 'තව එකක් 😏' }, type: 1 },
+            { buttonId: 'send_vcard', buttonText: { displayText: 'Fake Contact 📇' }, type: 1 }
+        ],
+        headerType: 1,
+        contextInfo: {
+            mentionedJid: [],
+            forwardingScore: 999,
+            isForwarded: true,
+        }
+    };
+
+    // පලවෙනි msg එක
+    await robin.sendMessage(from, buttonMessage, { quoted: mek });
+
+    // Button click කරාම vcard යවන්න
+    // මේකට වෙනම event listener එකක් ඕන. නැත්තම් simple version එකක් දෙන්නම්
 });
 
-// AUTO DETECT
+// SIMPLE VERSION: .baduva vcard කියලා ගැහුවම direct vcard යනවා
 cmd({
-    on: "body" // සමහර bot වල on: "text" වෙනුවට on: "body"
-}, 
+    pattern: "badunb",
+    react: "📇",
+    desc: "Send fake vcard",
+    category: "fun",
+    filename: __filename
+},
 async (robin, mek) => {
-    try {
-        const from = mek.key.remoteJid;
-        const body = mek.message?.conversation || mek.message?.extendedTextMessage?.text || "";
-        
-        if(!body) return;
-        const text = body.toLowerCase();
-
-        if (text.includes("බඩුව")) {
-            await robin.sendMessage(from, { react: { text: "😏", key: mek.key } });
-            const random = ponnayaReplies[Math.floor(Math.random() * ponnayaReplies.length)];
-            await robin.sendMessage(from, { text: random }, { quoted: mek });
+    const from = mek.key.remoteJid;
+    
+    const fakeContact = {
+        key: { fromMe: false, participant: "0@s.whatsapp.net", remoteJid: from },
+        message: { 
+            contactMessage: {
+                displayName: "දාර බඩුව 🥷",
+                vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Baduwa King 👑
+ORG:Baduwa Company;
+TEL;type=CELL;type=VOICE;waid=94765480861
+EMAIL:baduwaking.com
+END:VCARD`,
+                jpegThumbnail: null
+            }
         }
-    } catch (e) {
-        console.log(e)
-    }
+    };
+
+    await robin.sendMessage(from, { 
+        contacts: { 
+            displayName: "Baduwa King 👑", 
+            contacts: [fakeContact.message.contactMessage] 
+        } 
+    }, { quoted: mek });
 });
