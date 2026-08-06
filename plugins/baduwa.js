@@ -38,8 +38,8 @@ async (robin, mek) => {
 
     // LIST MESSAGE - 100% වැඩ
     const msg = {
-        image: { url: 'https://files.catbox.moe/chtymz.jpg' },
-        caption: text + "\n\n*පහලින් තෝරගන්න 👇*",
+        image: { url: '' },
+        caption: text + "\n\n> ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
         footer: "Baduwa Bot",
         templateButtons: [
             { index: 1, urlButton: { displayText: 'GitHub', url: 'https://github.com' } }, // උදාහරණයක්
