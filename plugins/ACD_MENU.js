@@ -268,7 +268,7 @@ cmd({
   alias: ['status', 'bot'],
   desc: 'Check if bot is alive',
   category: 'main',
-  react: '💚',
+  react: '🚀',
   filename: __filename
 }, async (conn, mek, m, { from, pushname, reply }) => {
   try {
@@ -289,7 +289,7 @@ cmd({
     text += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['alive']);
+      const imgBuf = await getBuffer(CAT_IMAGES['']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: text,
