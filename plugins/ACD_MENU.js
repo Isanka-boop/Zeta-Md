@@ -413,8 +413,7 @@ cmd({
     text += `┃ 📦 *${boldSerif('Commands')}* : ${totalCmds}\n`;
     text += `│\n╰──────────────────────╯\n\n`;
     text += `_💡 Type below \`${px}menu\`_\n`;
-    text += GLOBAL_FOOTER\n;
-    text += OWNER_NAME;
+    text += GLOBAL_FOOTER;
 
     const buttons = [
       { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '📋 Menu', id: `${px}menu` }) },
