@@ -413,14 +413,14 @@ cmd({
     text += `┃ 📦 *${boldSerif('Commands')}* : ${totalCmds}\n`;
     text += `│\n╰──────────────────────╯\n\n`;
     text += `_💡 Type below \`${px}menu\`_\n`;
-    text += GLOBAL_FOOTER;
+    text += GLOBAL_FOOTER\n;
+    text += OWNER_NAME;
 
     const buttons = [
       { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '📋 Menu', id: `${px}menu` }) },
       { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '🏓 Ping', id: `${px}ping` }) }
     ];
 
-    menuText += OWNER_NAME;
 
     // 1) ALWAYS send the plain text reply first — this is guaranteed
     //    and never depends on whether buttons succeed. (Previously
