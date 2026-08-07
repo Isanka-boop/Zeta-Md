@@ -18,7 +18,7 @@ const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ∇';
 
 // ── All Menu Specific Images (All commands have image + reply) ─────
 const CAT_IMAGES = {
-  main:       'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Main Menu Image
+  main:       'https://files.catbox.moe/da461k.jpg',//ɪᴍᴀɢᴇ', // Main Menu Image
   alive:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Alive Image
   detail:     'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ', // Command Details Image
   group:      'https://files.catbox.moe/chtymz.jpg',//ɪᴍᴀɢᴇ',
