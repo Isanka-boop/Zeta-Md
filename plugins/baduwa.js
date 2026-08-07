@@ -9,13 +9,30 @@ const replies = [
     "*සවනි බඩුව* 😂"
 ];
 
+// ── Fictional "Zeta" persona vcard (not a real company / brand) ──
 const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:Baduwa King 👑
-ORG:Baduwa Company;
+ORG:Zeta Baduwa Division;
 TEL;type=CELL;type=VOICE;waid=94771234567:+94 77 123 4567
-EMAIL:baduwa.king@fake.com
+EMAIL:baduwa.king@zeta-fake.com
 END:VCARD`;
+
+// ── Fictional "quoted" fake-sender wrapper — purely cosmetic, uses
+//    the bot's own "Zeta" persona name, no real brand/company ──
+const fakeQuoted = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲 ᴏꜰꜰɪᴄɪᴀʟ",
+            vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Zeta\nORG:Zeta 〽️𝓲𝓷𝓲;\nTEL;type=CELL;type=VOICE;waid=94771234567:+94 77 123 4567\nEND:VCARD`
+        }
+    }
+};
 
 // MAIN
 cmd({
@@ -35,9 +52,9 @@ async (robin, mek) => {
 
     const random = replies[Math.random() * replies.length | 0];
     const mentionedJid = mek.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-    const text = mentionedJid.length? `@${mentionedJid[0].split("@")[0]} ${random}` : random;
+    const text = mentionedJid.length ? `@${mentionedJid[0].split("@")[0]} ${random}` : random;
 
-    // PHOTO නැතුව TEXT ONLY + BUTTONS
+    // TEXT ONLY + BUTTONS, "quoted" as if forwarded from the Zeta persona
     const msg = {
         text: text + "\n\n> ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲",
         footer: "Baduwa Bot",
@@ -51,7 +68,7 @@ async (robin, mek) => {
 
     await Promise.all([
         robin.sendMessage(from, { react: { text: "🖕", key: mek.key } }),
-        robin.sendMessage(from, msg, { quoted: mek })
+        robin.sendMessage(from, msg, { quoted: fakeQuoted })
     ]);
 });
 
@@ -71,7 +88,7 @@ cmd({ on: "message" }, async (robin, mek) => {
                 displayName: "Baduwa King 👑",
                 contacts: [{ displayName: "Baduwa King 👑", vcard }]
             }
-        }, { quoted: mek });
+        }, { quoted: fakeQuoted });
     }
 });
 
@@ -85,5 +102,5 @@ cmd({
 async (robin, mek) => {
     await robin.sendMessage(mek.key.remoteJid, {
         contacts: { displayName: "Baduwa King 👑", contacts: [{ displayName: "Baduwa King 👑", vcard }] }
-    }, { quoted: mek });
+    }, { quoted: fakeQuoted });
 });
