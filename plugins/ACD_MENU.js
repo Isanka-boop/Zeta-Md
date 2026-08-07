@@ -420,14 +420,13 @@ cmd({
       { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '🏓 Ping', id: `${px}ping` }) }
     ];
 
-
     // 1) ALWAYS send the plain text reply first — this is guaranteed
     //    and never depends on whether buttons succeed. (Previously
     //    this was gated behind the buttons attempt, and relayMessage()
     //    can resolve without throwing even when WhatsApp silently
     //    fails to render the interactive message — so the guaranteed
     //    fallback was getting skipped even though nothing appeared.)
-    await conn.sendMessage(from, { text: hintText }, { quoted: zetaQuoted });
+    await conn.sendMessage(from, { text }, { quoted: zetaQuoted });
 
     // 2) THEN, best-effort, try to send the tappable .menu/.ping
     //    buttons as a bonus follow-up. If this fails or times out it
