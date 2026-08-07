@@ -51,8 +51,64 @@ const CAT_REACTS = {
   other:      '✨'
 };
 
+// ── Category display icons (used in the pretty category list) ────
+const CAT_ICONS = {
+  group:      '👥',
+  main:       '🏠',
+  settings:   '⚙️',
+  tools:      '🔧',
+  download:   '⬇️',
+  ai:         '🤖',
+  fun:        '🎮',
+  search:     '🔍',
+  anime:      '🎎',
+  owner:      '👨🏻‍💻',
+  textmaker:  '🗒️',
+  other:      '✨'
+};
+
 // ── Global Footer Content ────────────────────────────────────────
 const GLOBAL_FOOTER = `\n╭───────────╮\n> 𝙿σ𝚆є𝚁є𝙳 𝙱у ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲\n╰───────────╯`;
+
+// ══════════════════════════════════════════════════════════════════
+// 𝐁𝐎𝐋𝐃 𝐒𝐄𝐑𝐈𝐅 FONT HELPER — converts plain A-Z / a-z / 0-9 into the
+// Unicode "Mathematical Bold" font (𝐀𝐁𝐂...𝐳, 𝟎-𝟗) for nice-looking
+// section headers, without touching emoji / box-drawing characters.
+// ══════════════════════════════════════════════════════════════════
+function boldSerif(str) {
+  const map = {};
+  const upperStart = 0x1D400; // 𝐀
+  const lowerStart = 0x1D41A; // 𝐚
+  const digitStart = 0x1D7CE; // 𝟎
+  for (let i = 0; i < 26; i++) {
+    map[String.fromCharCode(65 + i)] = String.fromCodePoint(upperStart + i);
+    map[String.fromCharCode(97 + i)] = String.fromCodePoint(lowerStart + i);
+  }
+  for (let i = 0; i < 10; i++) {
+    map[String.fromCharCode(48 + i)] = String.fromCodePoint(digitStart + i);
+  }
+  return str.split('').map(ch => map[ch] || ch).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FAKE-QUOTED "ZETA OFFICIAL" CARD — purely cosmetic, fictional
+// persona (the bot's own name, no real brand/company). Every message
+// this plugin sends is quoted as if forwarded from "Zeta Official"
+// for a consistent, branded look across the whole menu system.
+// ══════════════════════════════════════════════════════════════════
+const zetaQuoted = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "© ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲 ᴏꜰꜰɪᴄɪᴀʟ",
+      vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Zeta\nORG:Zeta 〽️𝓲𝓷𝓲;\nTEL;type=CELL;type=VOICE;waid=94771234567:+94 77 123 4567\nEND:VCARD`
+    }
+  }
+};
 
 // ── Pending menu state: userId -> { stage, keys, cats, cmds, catName, prefix } ──
 const menuState = new Map();
@@ -81,36 +137,43 @@ function groupByCategory() {
   return cats;
 }
 
+// ── Pretty category list: icon + name + command count per line ───
 function buildCategoryList(cats) {
   const keys = Object.keys(cats);
   let text = '';
   keys.forEach((cat, i) => {
-    const numStr = (i + 1) < 10 ? `*${i + 1}.* ` : `*${i + 1}.*`;
-    text += `${numStr}│❯❯◦ ${cat.toUpperCase()} MENU\n`;
+    const icon = CAT_ICONS[cat] || CAT_ICONS['other'];
+    const num  = (i + 1).toString().padStart(2, '0');
+    const name = cat.charAt(0).toUpperCase() + cat.slice(1);
+    const count = cats[cat].length;
+    text += `┃ ${num}  ${icon}  *${boldSerif(name)}*  ·· \`${count} cmds\`\n`;
   });
   return { text, keys };
 }
 
 function buildCmdList(cmds, catName, prefix) {
-  let text = `╭──「 ${catName.toUpperCase()} COMMANDS 」\n`;
+  const icon = CAT_ICONS[catName] || CAT_ICONS['other'];
+  let text = `╭───「 ${icon} *${boldSerif(catName.toUpperCase())}*  ·  ${cmds.length} cmds 」\n│\n`;
   cmds.forEach((c, i) => {
-    text += `│ ${i + 1}. \`${prefix}${c.pattern}\`\n`;
-    if (c.desc) text += `│    ─ _${c.desc}_\n`;
+    const num = (i + 1).toString().padStart(2, '0');
+    text += `┃ ✧ *${num}.* \`${prefix}${c.pattern}\`\n`;
+    if (c.desc) text += `┃    ╰ _${c.desc}_\n`;
   });
-  text += `╰─────────────\n\n`;
-  text += `📝 *Reply with a number to see full command details!*\n`;
+  text += `│\n╰────────────────────\n\n`;
+  text += `💬 Reply with a *number* to view full details\n`;
+  text += `↩️ Reply *0* to close this menu\n`;
   text += GLOBAL_FOOTER;
   return text;
 }
 
 function buildCmdDetail(c, prefix) {
-  let text = `╔══════════════════════╗\n`;
-  text += `║  📌 COMMAND DETAILS  ║\n`;
-  text += `╚══════════════════════╝\n\n`;
-  text += `🔹 *Command:* \`${prefix}${c.pattern}\`\n`;
-  if (c.desc)      text += `📝 *Info:* ${c.desc}\n`;
-  if (c.category)  text += `📂 *Category:* ${c.category.toUpperCase()}\n`;
-  if (c.alias?.length) text += `🔁 *Aliases:* ${c.alias.map(a => `\`${prefix}${a}\``).join(', ')}\n`;
+  let text = `╭─「 📌 ${boldSerif('COMMAND DETAILS')} 」\n│\n`;
+  text += `┃ 🔹 *${boldSerif('Command')}*   : \`${prefix}${c.pattern}\`\n`;
+  if (c.desc)      text += `┃ 📝 *${boldSerif('About')}*     : ${c.desc}\n`;
+  if (c.category)  text += `┃ 📂 *${boldSerif('Category')}*  : ${c.category.toUpperCase()}\n`;
+  if (c.alias?.length) text += `┃ 🔁 *${boldSerif('Aliases')}*   : ${c.alias.map(a => `\`${prefix}${a}\``).join(', ')}\n`;
+  text += `│\n╰────────────────────\n\n`;
+  text += `↩️ Reply with *any number* to go back to the list\n`;
   text += GLOBAL_FOOTER;
   return text;
 }
@@ -141,32 +204,38 @@ cmd({
     const seconds = Math.floor(uptime % 60);
     const usedMemory = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const totalMemory = Math.round(os.totalmem() / 1024 / 1024);
+    const totalCmds = commands.filter(c => c.pattern && !c.dontAddCommandList).length;
+
+    const hour = new Date().getHours();
+    const greetWord = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+    const greetIcon = hour < 12 ? '🌅' : hour < 18 ? '☀️' : '🌙';
 
     let menuText = ``;
-    menuText += `👋 𝐇𝐄𝐘 ${pushname} 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐙𝐄𝐓𝐀 🫵\n`;
-    menuText += `╭━━━〔 𝐙𝐄𝐓𝐀 𝐌𝐄𝐍𝐔〕━✦\n`;
-    menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
-    menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
-    menuText += `│  🌀 \`Uptime\`   : ${hours}h ${minutes}m ${seconds}s\n`;
-    menuText += `│  🧠 \`RAM\`      : ${usedMemory}MB / ${totalMemory}MB\n`;
-    menuText += `╰────────────╯\n\n`;
-    menuText += `╔═══════════════════╗\n`;
-    menuText += ` 📂  \`SELECT A CATEGORY\`   \n`;
-    menuText += `╚═══════════════════╝\n`;
+    menuText += `${greetIcon} ${boldSerif(greetWord)}, *${pushname}* ✨\n\n`;
+    menuText += `╭━━━━━━━━━━━━━━━━━━╮\n`;
+    menuText += `   ${BOT_NAME}  ${BOT_VERSION}\n`;
+    menuText += `╰━━━━━━━━━━━━━━━━━━╯\n`;
+    menuText += `┃ 👑 *${boldSerif('Owner')}*   : ${OWNER_NAME}\n`;
+    menuText += `┃ ⏱️ *${boldSerif('Uptime')}*  : ${hours}h ${minutes}m ${seconds}s\n`;
+    menuText += `┃ 🧠 *${boldSerif('RAM')}*     : ${usedMemory}MB / ${totalMemory}MB\n`;
+    menuText += `┃ 📦 *${boldSerif('Total')}*   : ${totalCmds} commands\n`;
+    menuText += `╰──────────────────╯\n\n`;
+    menuText += `📂 ${boldSerif('SELECT A CATEGORY')}\n`;
+    menuText += `┏──────────────────\n`;
     menuText += catList;
-    menuText += ` ┗━━━━━━━━━━━━✨\n`;
-    menuText += `📝 *Reply with the category number.*\n`;
+    menuText += `┗──────────────────\n\n`;
+    menuText += `💬 Reply with the *category number* to explore\n`;
     menuText += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['']);
+      const imgBuf = await getBuffer(CAT_IMAGES['main']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: menuText,
         mimetype: 'image/jpeg'
-      }, { quoted: mek });
+      }, { quoted: zetaQuoted });
     } catch {
-      await conn.sendMessage(from, { text: menuText }, { quoted: mek });
+      await conn.sendMessage(from, { text: menuText }, { quoted: zetaQuoted });
     }
 
   } catch (e) { reply(`❌ Error: ${e.message}`); }
@@ -212,9 +281,9 @@ cmd({
           image: imgBuf,
           caption: listText,
           mimetype: 'image/jpeg'
-        }, { quoted: mek });
+        }, { quoted: zetaQuoted });
       } catch {
-        reply(listText);
+        await conn.sendMessage(from, { text: listText }, { quoted: zetaQuoted });
       }
       return;
     }
@@ -239,9 +308,9 @@ cmd({
           image: imgBuf,
           caption: detailText,
           mimetype: 'image/jpeg'
-        }, { quoted: mek });
+        }, { quoted: zetaQuoted });
       } catch {
-        reply(detailText);
+        await conn.sendMessage(from, { text: detailText }, { quoted: zetaQuoted });
       }
       return;
     }
@@ -262,9 +331,9 @@ cmd({
           image: imgBuf,
           caption: listText,
           mimetype: 'image/jpeg'
-        }, { quoted: mek });
+        }, { quoted: zetaQuoted });
       } catch {
-        reply(listText);
+        await conn.sendMessage(from, { text: listText }, { quoted: zetaQuoted });
       }
       return;
     }
@@ -303,7 +372,7 @@ async function sendAliveButtons(conn, from, mek, { caption, footer, buttons }) {
           interactiveMessage
         }
       }
-    }, { quoted: mek, userJid: conn.user.id });
+    }, { quoted: zetaQuoted, userJid: conn.user.id });
 
     await withTimeout(
       conn.relayMessage(from, waMsg.message, { messageId: waMsg.key.id }),
@@ -336,14 +405,14 @@ cmd({
     const sec = Math.floor(uptime % 60);
     const totalCmds = commands.filter(c => c.pattern && !c.dontAddCommandList).length;
 
-    let text = `╭━━━〔 𝐀𝐋𝐈𝐕𝐄 〕━✦\n`;
-    text += `│  🟢 \`Status\`   : Online & Running\n`;
-    text += `│  🤖 \`Bot\`      : ${BOT_NAME} v${BOT_VERSION}\n`;
-    text += `│  👋 \`Owner\`     : ${OWNER_NAME}\n`;
-    text += `│  ⏱️ \`Uptime\`   : ${h}h ${min}m ${sec}s\n`;
-    text += `│  📊 \`Cmds\`     : ${totalCmds}\n`;
-    text += `╰────────────╯\n\n`;
-    text += `_💡 .𝘖𝘞𝘕𝘌𝘙 \`${px}menu\` to open the interactive UI_\n`;
+    let text = `╭━━━「 🚀 ${boldSerif("I'M ALIVE!")} 」━━━╮\n│\n`;
+    text += `┃ 🟢 *${boldSerif('Status')}*   : Online & Running\n`;
+    text += `┃ 🤖 *${boldSerif('Bot')}*      : ${BOT_NAME} ${BOT_VERSION}\n`;
+    text += `┃ 👑 *${boldSerif('Owner')}*    : ${OWNER_NAME}\n`;
+    text += `┃ ⏱️ *${boldSerif('Uptime')}*   : ${h}h ${min}m ${sec}s\n`;
+    text += `┃ 📦 *${boldSerif('Commands')}* : ${totalCmds}\n`;
+    text += `│\n╰──────────────────────╯\n\n`;
+    text += `_💡 Tap a button below, or type \`${px}menu\`_\n`;
     text += GLOBAL_FOOTER;
 
     const buttons = [
@@ -359,7 +428,7 @@ cmd({
     //    can resolve without throwing even when WhatsApp silently
     //    fails to render the interactive message — so the guaranteed
     //    fallback was getting skipped even though nothing appeared.)
-    await reply(hintText);
+    await conn.sendMessage(from, { text: hintText }, { quoted: zetaQuoted });
 
     // 2) THEN, best-effort, try to send the tappable .menu/.ping
     //    buttons as a bonus follow-up. If this fails or times out it
@@ -408,9 +477,9 @@ cmd({
         image: imgBuf,
         caption: detailText,
         mimetype: 'image/jpeg'
-      }, { quoted: mek });
+      }, { quoted: zetaQuoted });
     } catch {
-      reply(detailText);
+      await conn.sendMessage(from, { text: detailText }, { quoted: zetaQuoted });
     }
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
