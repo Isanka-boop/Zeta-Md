@@ -169,9 +169,9 @@ function buildCmdList(cmds, catName, prefix) {
 function buildCmdDetail(c, prefix) {
   let text = `╭─「 📌 ${boldSerif('COMMAND DETAILS')} 」\n│\n`;
   text += `┃ 🔹 *${boldSerif('Command')}*   : \`${prefix}${c.pattern}\`\n`;
-  if (c.desc)      text += `┃ 📝 *${boldSerif('About')}*     : ${c.desc}\n`;
-  if (c.category)  text += `┃ 📂 *${boldSerif('Category')}*  : ${c.category.toUpperCase()}\n`;
-  if (c.alias?.length) text += `┃ 🔁 *${boldSerif('Aliases')}*   : ${c.alias.map(a => `\`${prefix}${a}\``).join(', ')}\n`;
+  if (c.desc)      text += `┃ 📝 *${boldSerif('About')}* ${c.desc}\n`;
+  if (c.category)  text += `┃ 📂 *${boldSerif('Category')}*  ${c.category.toUpperCase()}\n`;
+  if (c.alias?.length) text += `┃ 🔁 *${boldSerif('Aliases')}*  ${c.alias.map(a => `\`${prefix}${a}\``).join(', ')}\n`;
   text += `│\n╰────────────────────\n\n`;
   text += `↩️ Reply with *any number* to go back to the list\n`;
   text += GLOBAL_FOOTER;
@@ -186,7 +186,7 @@ cmd({
   alias: ['help', 'cmds', 'commands'],
   desc: 'Interactive bot menu with image',
   category: 'main',
-  react: '🦋',
+  react: '🚫',
   filename: __filename
 }, async (conn, mek, m, { sender, from, pushname, prefix, reply }) => {
   try {
@@ -228,7 +228,7 @@ cmd({
     menuText += GLOBAL_FOOTER;
 
     try {
-      const imgBuf = await getBuffer(CAT_IMAGES['main']);
+      const imgBuf = await getBuffer(CAT_IMAGES['']);
       await conn.sendMessage(from, {
         image: imgBuf,
         caption: menuText,
@@ -412,7 +412,7 @@ cmd({
     text += `┃ ⏱️ *${boldSerif('Uptime')}*   : ${h}h ${min}m ${sec}s\n`;
     text += `┃ 📦 *${boldSerif('Commands')}* : ${totalCmds}\n`;
     text += `│\n╰──────────────────────╯\n\n`;
-    text += `_💡 Tap a button below, or type \`${px}menu\`_\n`;
+    text += `_💡 Type below \`${px}menu\`_\n`;
     text += GLOBAL_FOOTER;
 
     const buttons = [
