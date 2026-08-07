@@ -353,12 +353,19 @@ cmd({
 
     const hintText = text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`;
 
-    // Guaranteed-reply chain: buttons (text only) → plain text.
-    // Timeout means a stuck relay can never leave the command
-    // hanging with just a react and no reply.
-    let sent = false;
+    // 1) ALWAYS send the plain text reply first — this is guaranteed
+    //    and never depends on whether buttons succeed. (Previously
+    //    this was gated behind the buttons attempt, and relayMessage()
+    //    can resolve without throwing even when WhatsApp silently
+    //    fails to render the interactive message — so the guaranteed
+    //    fallback was getting skipped even though nothing appeared.)
+    await reply(hintText);
+
+    // 2) THEN, best-effort, try to send the tappable .menu/.ping
+    //    buttons as a bonus follow-up. If this fails or times out it
+    //    has zero effect on step 1 above.
     try {
-      sent = await withTimeout(
+      await withTimeout(
         sendAliveButtons(conn, from, mek, {
           caption: text,
           footer: GLOBAL_FOOTER,
@@ -369,11 +376,6 @@ cmd({
     } catch (e) {
       console.error('[ALIVE BUTTONS TIMEOUT/ERROR]', e.message);
     }
-
-    if (sent) return;
-
-    // Last resort: plain text always goes through.
-    reply(hintText);
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
 
@@ -412,3 +414,4 @@ cmd({
     }
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
+
