@@ -14,7 +14,7 @@ const {
 // ══════════════════════════════════════════════════════════════════
 const BOT_NAME    = 'ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲';
 const BOT_VERSION = 'v3.0';
-const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ∇';
+const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ 🥷';
 
 // ── All Menu Specific Images (All commands have image + reply) ─────
 const CAT_IMAGES = {
@@ -420,7 +420,7 @@ cmd({
       { name: 'quick_reply', buttonParamsJson: JSON.stringify({ display_text: '🏓 Ping', id: `${px}ping` }) }
     ];
 
-    const hintText = text + `\n\n_(👉 ${px}menu  |  ${px}ping)_`;
+    menuText += OWNER_NAME;
 
     // 1) ALWAYS send the plain text reply first — this is guaranteed
     //    and never depends on whether buttons succeed. (Previously
