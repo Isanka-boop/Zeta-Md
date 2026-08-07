@@ -14,7 +14,7 @@ const {
 // ══════════════════════════════════════════════════════════════════
 const BOT_NAME    = 'ᴢᴇᴛᴀ 〽️𝓲𝓷𝓲';
 const BOT_VERSION = 'v3.0';
-const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ';
+const OWNER_NAME  = 'ɪꜱᴀɴᴋᴀ∇';
 
 // ── All Menu Specific Images (All commands have image + reply) ─────
 const CAT_IMAGES = {
@@ -144,7 +144,6 @@ cmd({
 
     let menuText = ``;
     menuText += `👋 𝐇𝐄𝐘 ${pushname} 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 𝐓𝐎 𝐙𝐄𝐓𝐀 🫵\n`;
-    \n
     menuText += `╭━━━〔 𝐙𝐄𝐓𝐀 𝐌𝐄𝐍𝐔〕━✦\n`;
     menuText += `│  👾 \`Bot\`      : ${BOT_NAME}\n`;
     menuText += `│  📞 \`Owner\`    : ${OWNER_NAME}\n`;
@@ -344,7 +343,7 @@ cmd({
     text += `│  ⏱️ \`Uptime\`   : ${h}h ${min}m ${sec}s\n`;
     text += `│  📊 \`Cmds\`     : ${totalCmds}\n`;
     text += `╰────────────╯\n\n`;
-    text += `_💡 Tap a button below, or use \`${px}menu\` to open the interactive UI_\n`;
+    text += `_💡 .𝘖𝘞𝘕𝘌𝘙 \`${px}menu\` to open the interactive UI_\n`;
     text += GLOBAL_FOOTER;
 
     const buttons = [
@@ -415,4 +414,3 @@ cmd({
     }
   } catch (e) { reply(`❌ Error: ${e.message}`); }
 });
-
